@@ -4,7 +4,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ExcelController;
+use Maatwebsite\Excel\Facades\Excel;
 
+
+Route::get('/php-check', function () {
+    return phpinfo();
+});
+Route::get('/dashboard', [ExcelController::class, 'index'])->name('dashboard');
 // Rute untuk halaman utama (login/register)
 // Ketika user belum login, mereka akan melihat halaman welcome
 Route::get('/', function () {
