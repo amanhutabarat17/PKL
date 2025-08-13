@@ -24,6 +24,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
     
@@ -80,10 +81,25 @@
                 </div>
             </header>
 
-            <!-- Kartu utama untuk konten dashboard -->
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
-                <p class="text-slate-300 text-lg">Anda telah berhasil login!</p>
-            </div>
+    <div x-data="{ show: true }" x-show="show" x-transition class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
+        <p class="text-slate-300 text-lg">Anda telah berhasil login!</p>
+        <button @click="show = false" class="mt-4 px-4 py-2 bg-slate-600 text-white rounded">Tutup</button>
+    </div>
+</div>
+<h2>Selamat datang, {{ $user->name }}</h2>
+
+<table border="1" cellpadding="5">
+    @foreach ($rows as $row)
+        <tr>
+            @foreach ($row as $cell)
+                <td>{{ $cell }}</td>
+            @endforeach
+        </tr>
+    @endforeach
+</table>
+
+
             
         </main>
 

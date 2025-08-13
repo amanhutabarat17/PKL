@@ -1,10 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\ToArray;
 class DashboardController extends Controller
 {
     /**
@@ -12,19 +11,22 @@ class DashboardController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
-    {
-        // Mendapatkan data user yang sedang login
-        $user = Auth::user();
 
-        // Di sini Anda bisa mengambil data lain dari database
-        // Misalnya, data penugasan yang terkait dengan user ini
-        // $penugasan = Penugasan::where('user_id', $user->id)->get();
+public function index()
+{
+    $user = Auth::user();
+    $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
 
-        // Kembalikan tampilan dashboard dan kirimkan data (jika ada)
-        return view('dashboard', [
-            'user' => $user,
-            // 'penugasan' => $penugasan,
-        ]);
-    }
+    $rows = Excel::toArray(new class implements ToArray {
+        public function array(array $array)
+        {
+            return $array;
+        }
+    }, $path)[0];
+
+    return view('dashboard', [
+        'user' => $user,
+        'rows' => $rows,
+    ]);
+}
 }
