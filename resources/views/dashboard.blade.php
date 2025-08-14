@@ -48,7 +48,7 @@
                         </a>
                     </li>
                     <li class="mb-4">
-                        <a href="#" class="flex items-center space-x-3 text-lg font-medium text-slate-400 hover:text-blue-400 p-3 rounded-xl transition-colors duration-200">
+                        <a href="{{ route('penugasan.index') }}" class="flex items-center space-x-3 text-lg font-medium text-slate-400 hover:text-blue-400 p-3 rounded-xl transition-colors duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
@@ -76,7 +76,7 @@
                     <div class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-md shadow-lg py-1 z-10 hidden group-hover:block transition-all duration-200">
                         <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Profil</a>
                         <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Pengaturan</a>
-                        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Keluar</a>
+                        <a href="{{ route('keluar') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Keluar</a>
                     </div>
                 </div>
             </header>
@@ -89,15 +89,26 @@
 </div>
 <h2>Selamat datang, {{ $user->name }}</h2>
 
-<table border="1" cellpadding="5">
-    @foreach ($rows as $row)
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
         <tr>
-            @foreach ($row as $cell)
-                <td>{{ $cell }}</td>
+            @foreach($header as $col)
+                <th>{{ $col }}</th>
             @endforeach
         </tr>
-    @endforeach
+    </thead>
+    <tbody>
+        @foreach($rows as $row)
+            <tr>
+                @foreach($row['data'] as $i => $cell)
+     <td style="background-color: {{ isset($row['colors'][$i]) ? $row['colors'][$i] : '' }}">
+    {{ $cell }}
+</td>   @endforeach
+            </tr>
+        @endforeach
+    </tbody>
 </table>
+
 
 
             

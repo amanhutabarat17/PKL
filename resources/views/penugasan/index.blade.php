@@ -1,84 +1,92 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app') --}}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Penugasan</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js']) {{-- Pastikan Tailwind aktif --}}
+</head>
+<body class="bg-gray-950 text-white font-sans">
 
-@section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-extrabold text-white">Daftar Penugasan Karyawan</h1>
-        {{-- Ikon 'Tambah Penugasan' dengan tautan --}}
-        <a href="{{ route('penugasan.create') }}" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition duration-300 transform hover:scale-110" aria-label="Tambah Penugasan">
-            {{-- Menggunakan SVG sederhana untuk ikon tambah --}}
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-        </a>
-    </div>
-
-    {{-- Kolom pencarian di atas tabel --}}
-    <div class="mb-4">
-        <input type="text" id="searchInput" placeholder="Cari penugasan..." class="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white transition-colors duration-200">
-    </div>
-
-    {{-- Tabel Penugasan --}}
-    <div class="bg-gray-900 rounded-2xl shadow-lg overflow-hidden">
-        <h2 class="text-xl font-bold text-white px-6 py-4">Tabel Penugasan</h2>
-        <div class="overflow-x-auto">
-            <table class="min-w-full table-auto text-gray-300" id="penugasanTable">
-                <thead class="bg-gray-800">
-                    <tr>
-                        <th class="px-6 py-3 text-left font-bold text-sm uppercase tracking-wider">#</th>
-                        <th class="px-6 py-3 text-left font-bold text-sm uppercase tracking-wider">Nama Karyawan</th>
-                        <th class="px-6 py-3 text-left font-bold text-sm uppercase tracking-wider">Kecamatan</th>
-                        <th class="px-6 py-3 text-left font-bold text-sm uppercase tracking-wider">Alamat Lengkap</th>
-                        <th class="px-6 py-3 text-left font-bold text-sm uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    {{-- Loop data penugasan --}}
-                    @forelse ($penugasans as $index => $penugasan)
-                        <tr class="hover:bg-gray-800 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap nama_karyawan">{{ $penugasan->nama_karyawan }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap kecamatan">{{ $penugasan->kecamatan->nama_kecamatan }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap alamat_lengkap">{{ $penugasan->alamat_lengkap }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <a href="{{ route('penugasan.edit', $penugasan->id) }}" class="text-blue-400 hover:text-blue-600 font-semibold mr-4">Edit</a>
-                                <form action="{{ route('penugasan.destroy', $penugasan->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-600 font-semibold">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 text-center">Tidak ada data penugasan.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    {{-- Navbar --}}
+    <nav class="bg-gray-900 shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-blue-400">Dashboard Penugasan</h1>
+            <a href="{{ route('keluar') }}" class="text-sm text-slate-300 hover:text-red-400 transition">Keluar</a>
         </div>
-    </div>
-</div>
-@endsection
+    </nav>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('searchInput');
-        const tableRows = document.querySelectorAll('#penugasanTable tbody tr');
+    {{-- Konten Utama --}}
+    <main class="container mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold">Daftar Penugasan Karyawan</h2>
+            <a href="{{ route('penugasan.create') }}" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition transform hover:scale-110" aria-label="Tambah Penugasan">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </a>
+        </div>
 
-        searchInput.addEventListener('keyup', function (e) {
-            const searchText = e.target.value.toLowerCase();
+        {{-- Pencarian --}}
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Cari penugasan..." class="w-full px-4 py-3 border border-gray-700 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        </div>
 
-            tableRows.forEach(row => {
-                const rowData = row.textContent.toLowerCase();
-                if (rowData.includes(searchText)) {
-                    row.style.display = ''; // Tampilkan baris jika cocok
-                } else {
-                    row.style.display = 'none'; // Sembunyikan baris jika tidak cocok
-                }
+        {{-- Tabel --}}
+        <div class="bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-300" id="penugasanTable">
+                    <thead class="bg-gray-800 text-xs uppercase font-bold">
+                        <tr>
+                            <th class="px-6 py-3">#</th>
+                            <th class="px-6 py-3">Nama petugas</th>
+                            <th class="px-6 py-3">Kecamatan</th>
+                            <th class="px-6 py-3">Alamat Lengkap</th>
+                            <th class="px-6 py-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        @forelse ($penugasans as $index => $penugasan)
+                            <tr class="hover:bg-gray-800 transition">
+                                <td class="px-6 py-4">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4">{{ $penugasan->nama_karyawan }}</td>
+                                <td class="px-6 py-4">{{ $penugasan->kecamatan->nama_kecamatan }}</td>
+                                <td class="px-6 py-4">{{ $penugasan->alamat_lengkap }}</td>
+                                <td class="px-6 py-4 flex gap-2">
+                                    <a href="{{ route('penugasan.edit', $penugasan->id) }}" class="text-blue-400 hover:text-blue-600 font-semibold">Edit</a>
+                                    <form action="{{ route('penugasan.destroy', $penugasan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-400 hover:text-red-600 font-semibold">Hapus</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-400">Tidak ada data penugasan.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    {{-- Script Pencarian --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const tableRows = document.querySelectorAll('#penugasanTable tbody tr');
+
+            searchInput.addEventListener('input', function () {
+                const searchText = this.value.toLowerCase();
+                tableRows.forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(searchText) ? '' : 'none';
+                });
             });
         });
-    });
-</script>
-@endpush
+    </script>
+
+</body>
+</html>

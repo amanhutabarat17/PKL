@@ -8,16 +8,18 @@ use App\Http\Controllers\ExcelController;
 use Maatwebsite\Excel\Facades\Excel;
 
 
-Route::get('/php-check', function () {
-    return phpinfo();
-});
 Route::get('/dashboard', [ExcelController::class, 'index'])->name('dashboard');
 // Rute untuk halaman utama (login/register)
 // Ketika user belum login, mereka akan melihat halaman welcome
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/keluar', function () {
 
+    session()->invalidate();       // Hapus session lama
+    session()->regenerateToken();  // Buat CSRF token baru
+    return view('/welcome');
+})->name('keluar');
 // Grup rute yang hanya bisa diakses oleh user yang sudah login
 Route::middleware('auth')->group(function () {
     // Rute untuk dashboard
