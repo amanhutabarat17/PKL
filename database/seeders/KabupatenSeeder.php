@@ -16,7 +16,9 @@ class KabupatenSeeder extends Seeder
             ['nama_kabupaten' => 'Dairi'],
             ['nama_kabupaten' => 'Nias'],
             ['nama_kabupaten' => 'Samosir'],
-            ['nama_kabupaten' => 'Langkat']
+            ['nama_kabupaten' => 'Langkat'],
+            ['nama_kabupaten' => 'Tapanuli Utara'],
+            ['nama_kabupaten' => 'Tapanuli Tengah']
             // Tambahkan kabupaten lain jika perlu
         ]);
     }

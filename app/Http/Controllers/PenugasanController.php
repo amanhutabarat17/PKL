@@ -88,9 +88,11 @@ class PenugasanController extends Controller
     /**
      * Dapatkan daftar kecamatan berdasarkan kabupaten.
      */
-    public function getKecamatan($kabupaten_id)
-    {
-        $kecamatans = Kecamatan::where('kabupaten_id', $kabupaten_id)->get();
-        return response()->json($kecamatans);
-    }
+
+public function getKecamatan($kabupaten_id)
+{
+    $kecamatans = Kecamatan::where('kabupaten_id', $kabupaten_id)->get();
+
+    return response()->json($kecamatans);
+}
 }

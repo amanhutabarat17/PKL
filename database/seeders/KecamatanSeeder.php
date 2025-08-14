@@ -13,6 +13,7 @@ class KecamatanSeeder extends Seeder
         $medanId = DB::table('kabupatens')->where('nama_kabupaten', 'Medan')->value('id');
         $niasId = DB::table('kabupatens')->where('nama_kabupaten', 'Nias')->value('id');
         $samosirId = DB::table('kabupatens')->where('nama_kabupaten', 'Samosir')->value('id');
+        $taput = DB::table('kabupatens')->where('nama_kabupaten', 'Tapanuli Utara')->value('id');
 
         DB::table('kecamatans')->insert([
             // Kecamatan untuk Deli Serdang
@@ -27,6 +28,9 @@ class KecamatanSeeder extends Seeder
 
               ['nama_kecamatan' => 'Tarutung', 'kabupaten_id' => $samosirId],
             ['nama_kecamatan' => 'Siborong Borong', 'kabupaten_id' => $samosirId],
+
+              ['nama_kecamatan' => 'Tarutung', 'kabupaten_id' => $taput],
+            ['nama_kecamatan' => 'Siborong Borong', 'kabupaten_id' => $taput],
         ]);
     }
 }

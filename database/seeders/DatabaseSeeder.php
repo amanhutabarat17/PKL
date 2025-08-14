@@ -12,13 +12,11 @@ class DatabaseSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
-        // Panggil seeder yang sudah Anda buat di sini
-        $this->call([
-            KabupatenSeeder::class,
-            KecamatanSeeder::class,
-            // Jika Anda memiliki seeder lain, tambahkan di sini
-        ]);
-    }
+   public function run()
+{
+    $this->call([
+        KabupatenSeeder::class,
+        KecamatanSeeder::class,
+    ]);
+}
 }
