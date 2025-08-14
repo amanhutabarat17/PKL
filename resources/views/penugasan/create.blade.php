@@ -6,12 +6,12 @@
         <h1 class="text-3xl font-extrabold text-white">Tambah Penugasan Baru</h1>
     </div>
 
-    <div class="bg-gray-900 rounded-2xl shadow-lg p-6">
+    <div class="bg-gray-950  rounded-2xl shadow-lg p-6">
         <form action="{{ route('penugasan.store') }}" method="POST">
             @csrf
 
             <div class="mb-4">
-                <label for="nama_karyawan" class="block text-gray-300 text-sm font-bold mb-2">Nama Karyawan</label>
+                <label for="nama_karyawan" class="block text-gray-300 text-sm font-bold mb-2">Nama Petugas</label>
                 <input type="text" id="nama_karyawan" name="nama_karyawan" class="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white transition-colors duration-200" required>
             </div>
 

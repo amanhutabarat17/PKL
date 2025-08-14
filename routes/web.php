@@ -40,12 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/get-kecamatan/{kabupaten_id}', [PenugasanController::class, 'getKecamatan']);
 
     // Grup rute khusus untuk role 'admin'
-    Route::middleware(['role:admin'])->group(function () {
+ 
         Route::get('/penugasan/create', [PenugasanController::class, 'create'])->name('penugasan.create');
         Route::get('/penugasan/{penugasan}/edit', [PenugasanController::class, 'edit'])->name('penugasan.edit');
         Route::put('/penugasan/{penugasan}', [PenugasanController::class, 'update'])->name('penugasan.update');
         Route::delete('/penugasan/{penugasan}', [PenugasanController::class, 'destroy'])->name('penugasan.destroy');
-    });
+    
 });
 
 require __DIR__.'/auth.php';

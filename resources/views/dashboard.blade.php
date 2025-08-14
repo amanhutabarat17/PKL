@@ -65,20 +65,20 @@
             <header class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold">Dashboard</h1>
                 
-                <!-- Dropdown pengguna -->
-                <div class="relative group">
-                    <button class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200">
-                        <span>{{ $user->name }}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                    <div class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-md shadow-lg py-1 z-10 hidden group-hover:block transition-all duration-200">
-                        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Profil</a>
-                        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Pengaturan</a>
-                        <a href="{{ route('keluar') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Keluar</a>
-                    </div>
-                </div>
+       <div class="relative" id="dropdown-wrapper">
+    <button id="dropdown-toggle" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200">
+        <span>{{ $user->name }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+    </button>
+    <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-md shadow-lg py-1 z-10 hidden transition-all duration-200">
+        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Profil</a>
+        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Pengaturan</a>
+        <a href="{{ route('keluar') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Keluar</a>
+    </div>
+</div>
+
             </header>
 
     <div x-data="{ show: true }" x-show="show" x-transition class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -113,7 +113,22 @@
 
             
         </main>
+<script>
+    const toggle = document.getElementById('dropdown-toggle');
+    const menu = document.getElementById('dropdown-menu');
 
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation(); // biar gak langsung nutup
+        menu.classList.toggle('hidden');
+    });
+
+    // Tutup dropdown kalau klik di luar
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('dropdown-wrapper').contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+</script>
     </div>
 </body>
 </html>
