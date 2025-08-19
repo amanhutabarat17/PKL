@@ -7,6 +7,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\OtpVerificationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController; // Pastikan ini ada atau sesuaikan dengan controller-mu
+
+
 
 // Rute utama aplikasi
 Route::get('/', function () {
@@ -35,6 +38,11 @@ Route::get('/keluar', function () {
     session()->regenerateToken();
     return redirect('/');
 })->name('keluar');
+// ... (kode rute lainnya)
+
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+            ->middleware('auth')
+            ->name('logout');
 
 // Grup Rute yang memerlukan autentikasi
 Route::middleware(['auth'])->group(function () {
