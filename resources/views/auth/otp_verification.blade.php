@@ -1,28 +1,37 @@
-<h1>Verifikasi Kode OTP</h1>
-<p>Kode verifikasi telah dikirim ke email {{ $email }}. Silakan masukkan kode di bawah ini.</p>
+<div class="container">
+    <h1>Verifikasi Kode OTP</h1>
 
-@if (session('success'))
-    <div>
+    <p>Kode verifikasi telah dikirim ke email **{{ $email }}**. Silakan masukkan kode di bawah ini.</p>
+
+    @if(session('success'))
+    <div class="alert alert-success">
         {{ session('success') }}
     </div>
-@endif
+    @endif
 
-@if ($errors->any())
-    <div>
+    @if($errors->any())
+    <div class="alert alert-danger">
         <ul>
             @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
+            <li>{{ $error }}</li>
             @endforeach
         </ul>
     </div>
-@endif
+    @endif
 
-<form method="POST" action="{{ route('otp.verify') }}">
-    @csrf
-    <input type="hidden" name="email" value="{{ $email }}">
+    <form method="POST" action="{{ route('verification.otp.verify') }}">
+        @csrf
+        <input type="hidden" name="email" value="{{ $email }}">
+        
+        <div>
+            <label for="otp_code">Kode OTP</label>
+            <input id="otp_code" type="text" name="otp_code" required autofocus>
+        </div>
 
-    <label for="otp">Kode OTP</label><br>
-    <input type="text" id="otp" name="otp" required><br><br>
-
-    <button type="submit">Verifikasi</button>
-</form>
+        <div>
+            <button type="submit">
+                Verifikasi
+            </button>
+        </div>
+    </form>
+</div>

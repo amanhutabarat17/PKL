@@ -3,10 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\OtpVerificationController;
-use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterOtpController;
+use App\Http\Controllers\Auth\OtpVerificationController;
 use Illuminate\Support\Facades\Route;
 
 // Rute utama aplikasi
@@ -16,18 +15,18 @@ Route::get('/', function () {
 
 // Grup Rute yang hanya bisa diakses oleh pengguna yang belum terautentikasi (guest)
 Route::middleware('guest')->group(function () {
-    // Rute untuk pendaftaran (register) menggunakan OtpController
-    // Ini adalah rute pendaftaran utama yang Anda inginkan
+    // Rute untuk pendaftaran (register)
     Route::get('/register', [RegisterOtpController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterOtpController::class, 'register']);
 
-    // Halaman verifikasi OTP
-    Route::get('/otp/verify', [RegisterOtpController::class, 'showOtpVerificationForm'])->name('otp.show');
-    Route::post('/otp/verify', [RegisterOtpController::class, 'verifyOtp'])->name('otp.verify');
+    // Rute untuk verifikasi OTP
+    Route::get('/otp-verification', [OtpVerificationController::class, 'showVerificationForm'])->name('verification.otp.form');
+    Route::post('/otp-verification', [OtpVerificationController::class, 'verify'])->name('verification.otp.verify');
 
     // Halaman login
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    // ... tambahkan route post untuk login sesuai kebutuhan Anda
+    // Tambahkan rute POST untuk memproses login
+    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 });
 
 // Rute untuk logout
@@ -66,4 +65,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Hapus baris ini untuk menghindari duplikasi rute pendaftaran
-require __DIR__.'/auth.php';
+// require __DIR__.'/auth.php';

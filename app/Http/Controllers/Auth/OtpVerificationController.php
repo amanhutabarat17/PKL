@@ -1,50 +1,64 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Carbon\Carbon; // Pastikan Anda mengimpor Carbon
 
 class OtpVerificationController extends Controller
 {
     /**
      * Tampilkan form verifikasi OTP.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function show(Request $request)
+    public function showVerificationForm(Request $request)
     {
-        // Jika user sudah login dan terverifikasi, alihkan ke dashboard.
-        if (Auth::check() && Auth::user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false));
+        $email = $request->session()->get('email');
+        if (!$email) {
+            return redirect()->route('login');
         }
-
-        // Tampilkan view verifikasi OTP.
-        return view('auth.verify-otp');
+        return view('auth.otp_verification', compact('email'));
     }
 
     /**
-     * Tangani verifikasi OTP.
+     * Tangani permintaan verifikasi OTP.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function verify(Request $request)
     {
-        // Cari user berdasarkan email
+        $request->validate([
+            'email' => 'required|email',
+            'otp_code' => 'required|string',
+        ]);
+
         $user = User::where('email', $request->email)->first();
 
-        // Validasi OTP
-        if (!$user || $user->otp != $request->otp) {
-            return back()->withErrors(['otp' => 'Kode OTP salah.']);
+        // Cek apakah user ada, kode OTP cocok, dan kode belum kedaluwarsa (10 menit)
+        if ($user && $user->otp_code === $request->otp_code) {
+            // Periksa apakah OTP sudah kedaluwarsa
+            if (Carbon::parse($user->otp_created_at)->addMinutes(10)->isPast()) {
+                return back()->withErrors(['otp_code' => 'Kode OTP telah kedaluwarsa. Silakan minta kode baru.']);
+            }
+
+            // Jika kode benar dan belum kedaluwarsa, tandai email terverifikasi
+            $user->email_verified_at = now();
+            $user->otp_code = null;
+            $user->otp_created_at = null;
+            $user->save();
+
+            // Login user secara otomatis setelah verifikasi berhasil
+            auth()->login($user);
+
+            return redirect()->route('dashboard')->with('status', 'Pendaftaran berhasil! Anda dapat masuk sekarang.');
         }
 
-        // Tandai email sebagai terverifikasi dan hapus OTP
-        $user->forceFill([
-            'email_verified_at' => now(),
-            'otp' => null,
-        ])->save();
-
-        // Login user
-        Auth::login($user);
-
-        // Alihkan ke dashboard setelah berhasil
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Jika kode OTP tidak cocok
+        return back()->withErrors(['otp_code' => 'Kode OTP tidak valid.']);
     }
 }

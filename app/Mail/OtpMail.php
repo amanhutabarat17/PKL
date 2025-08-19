@@ -1,12 +1,12 @@
 <?php
 
+// app/Mail/OtpMail.php
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class OtpMail extends Mailable
@@ -20,20 +20,9 @@ class OtpMail extends Mailable
         $this->otpCode = $otpCode;
     }
 
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Kode Verifikasi OTP Anda',
-        );
-    }
-
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.otp',
-            with: [
-                'otpCode' => $this->otpCode,
-            ]
-        );
+        return $this->subject('Your OTP Verification Code')
+                    ->view('emails.otp_verification'); // View untuk email
     }
 }
