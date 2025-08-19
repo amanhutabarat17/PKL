@@ -2,21 +2,25 @@
 
 namespace Database\Seeders;
 
-// Tambahkan use statement untuk KabupatenSeeder dan KecamatanSeeder
-use Database\Seeders\KabupatenSeeder;
-use Database\Seeders\KecamatanSeeder;
+// Gunakan use statement di sini untuk memanggil seeder lain
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Seed the application's database.
+     *
+     * @return void
      */
-   public function run()
-{
-    $this->call([
-        KabupatenSeeder::class,
-        KecamatanSeeder::class,
-    ]);
-}
+    public function run(): void
+    {
+        // Panggil seeder lain dari sini
+        // Pastikan urutannya benar: Kabupaten dulu, baru Kecamatan,
+        // karena Kecamatan butuh data dari Kabupaten.
+        $this->call([
+            KabupatenSeeder::class,
+            KecamatanSeeder::class,
+            // Anda bisa menambahkan seeder lain di sini jika ada
+        ]);
+    }
 }
