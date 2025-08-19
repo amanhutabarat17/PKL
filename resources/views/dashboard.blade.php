@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard BPJS Ketenagakerjaan</title>
     
-    <!-- Memuat Tailwind CSS dari CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Memuat Heroicons dari CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@heroicons/2.1.3/dist/24/outline/index.js"></script>
     <style>
         body {
@@ -28,10 +26,8 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
     
-    <!-- Kontainer utama dengan layout grid untuk dashboard -->
     <div class="flex flex-col md:flex-row h-screen">
 
-        <!-- Sidebar -->
         <aside class="sidebar bg-slate-800 p-6 shadow-lg md:flex-shrink-0 md:relative fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 z-50">
             <div class="flex items-center space-x-3 mb-8">
                 <span class="text-2xl font-bold">BPJS</span>
@@ -59,35 +55,41 @@
             </nav>
         </aside>
 
-        <!-- Konten utama -->
         <main class="flex-grow bg-slate-900 p-6 md:p-8 overflow-y-auto">
-            <!-- Header navbar -->
             <header class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold">Dashboard</h1>
                 
-       <div class="relative" id="dropdown-wrapper">
-    <button id="dropdown-toggle" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200">
-        <span>{{ $user->name }}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-        </svg>
-    </button>
-    <div id="dropdown-menu" class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-md shadow-lg py-1 z-10 hidden transition-all duration-200">
-        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Profil</a>
-        <a href="#" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Pengaturan</a>
-        <a href="{{ route('keluar') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Keluar</a>
-    </div>
-</div>
+                <div class="relative flex items-center space-x-2" id="dropdown-wrapper">
+                    @if ($user->avatar)
+                        <img src="{{ asset('storage/' . $user->avatar) }}" alt="Foto Profil" class="h-10 w-10 rounded-full object-cover">
+                    @else
+                        <div class="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold">
+                            {{ substr($user->name, 0, 1) }}
+                        </div>
+                    @endif
+
+                    <button id="dropdown-toggle" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200">
+                        <span>{{ $user->name }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <div id="dropdown-menu" class="absolute right-0 top-12 mt-2 w-48 bg-slate-800 rounded-md shadow-lg py-1 z-10 hidden transition-all duration-200">
+                        <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Profil</a>
+                        <a href="{{ route('tentang') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Tentang</a>
+                        <a href="{{ route('keluar') }}" class="block px-4 py-2 text-slate-300 hover:bg-slate-700">Keluar</a>
+                    </div>
+                </div>
 
             </header>
 
-    <div x-data="{ show: true }" x-show="show" x-transition class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-    <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
-        <p class="text-slate-300 text-lg">Anda telah berhasil login!</p>
-        <button @click="show = false" class="mt-4 px-4 py-2 bg-slate-600 text-white rounded">Tutup</button>
-    </div>
-</div>
-<h2>Selamat datang, {{ $user->name }}</h2>
+            <div x-data="{ show: true }" x-show="show" x-transition class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
+                    <p class="text-slate-300 text-lg">Anda telah berhasil login!</p>
+                    <button @click="show = false" class="mt-4 px-4 py-2 bg-slate-600 text-white rounded">Tutup</button>
+                </div>
+            </div>
+            <h2>Selamat datang, {{ $user->name }}</h2>
 
 <table border="1" cellpadding="5" cellspacing="0">
     <thead>
@@ -109,26 +111,27 @@
     </tbody>
 </table>
 
-    
 
-    
+
+            
         </main>
-<script>
-    const toggle = document.getElementById('dropdown-toggle');
-    const menu = document.getElementById('dropdown-menu');
+        <script>
+            const toggle = document.getElementById('dropdown-toggle');
+            const menu = document.getElementById('dropdown-menu');
 
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation(); // biar gak langsung nutup
-        menu.classList.toggle('hidden');
-    });
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation(); // biar gak langsung nutup
+                menu.classList.toggle('hidden');
+            });
 
-    // Tutup dropdown kalau klik di luar
-    document.addEventListener('click', (e) => {
-        if (!document.getElementById('dropdown-wrapper').contains(e.target)) {
-            menu.classList.add('hidden');
-        }
-    });
-</script>
+            // Tutup dropdown kalau klik di luar
+            document.addEventListener('click', (e) => {
+                const dropdownWrapper = document.getElementById('dropdown-wrapper');
+                if (dropdownWrapper && !dropdownWrapper.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

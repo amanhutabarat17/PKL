@@ -3,25 +3,35 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VerifyEmailController extends Controller
 {
     /**
-     * Mark the authenticated user's email address as verified.
+     * Tangani verifikasi OTP.
      */
-    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    public function __invoke(Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        // Cari pengguna berdasarkan email
+        $user = User::where('email', $request->email)->first();
+
+        // Jika pengguna tidak ditemukan atau OTP tidak cocok
+        if (!$user || $user->otp != $request->otp) {
+            return back()->withErrors(['otp' => 'Kode OTP salah.']);
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
-        }
+        // Tandai email sebagai terverifikasi dan hapus OTP dari database
+        $user->forceFill([
+            'email_verified_at' => now(),
+            'otp' => null,
+        ])->save();
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        // Login pengguna
+        Auth::login($user);
+
+        // Alihkan ke dashboard setelah berhasil
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 }
