@@ -209,6 +209,7 @@ public function store(Request $request)
             $newNo,
             $request->Nama,
             $request->KPJ,
+            $request->input('Jenis_Klaim'),
             $request->input('Tanggal_Terima'),
             $request->input('Tanggal_Rekam'),
             $request->Status,

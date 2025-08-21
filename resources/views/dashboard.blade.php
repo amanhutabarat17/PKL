@@ -178,85 +178,108 @@
     </div>
 
     <!-- Modal Tambah -->
-    <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="tambahModalLabel">
-                        <i class="fas fa-plus-circle me-2"></i>
-                        Tambah Data
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formTambah">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="nama" name="Nama" required>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="kpj" class="form-label">KPJ <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="kpj" name="KPJ" required>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="tanggalTerima" class="form-label">Tanggal Terima <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima"
-                                    required>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="tanggalRekam" class="form-label">Tanggal Rekam <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="tanggalRekam" name="Tanggal Rekam" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">Status</label>
-                                <select class="form-control" id="status" name="Status">
-                                    <option value="Diterima">Diterima</option>
-                                    <option value="Ditolak">Ditolak</option>
-                                    <option value="Pending">Pending</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
-                                <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
-                            </div>
-
-                            <div class="col-12 mb-3">
-                                <label for="keterangan" class="form-label">Keterangan</label>
-                                <input type="text" class="form-control" id="keterangan" name="Keterangan">
-                            </div>
-
-                            <div class="col-12 mb-3">
-                                <label for="alamat" class="form-label">Alamat</label>
-                                <textarea class="form-control" id="alamat" name="Alamat" rows="2"></textarea>
-                            </div>
-
-                            <div class="col-12 mb-3">
-                                <label for="petugas" class="form-label">Petugas</label>
-                                <input type="text" class="form-control" id="petugas" name="Petugas">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
-                        Batal
-                    </button>
-                    <button type="submit" form="formTambah" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>
-                        Simpan Data
-                    </button>
-                </div>
+<div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            
+            <!-- Header -->
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="tambahModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Tambah Data
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="formTambah">
+                    <div class="row">
+                        
+                        <!-- Nama -->
+                        <div class="col-md-6 mb-3">
+                            <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama" name="Nama" required>
+                        </div>
+
+                        <!-- KPJ -->
+                        <div class="col-md-6 mb-3">
+                            <label for="kpj" class="form-label">KPJ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="kpj" name="KPJ" required>
+                        </div>
+
+                        <!-- Jenis Klaim -->
+                        <div class="col-md-6 mb-3">
+                            <label for="jenisKlaim" class="form-label">Jenis Klaim <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="jenisKlaim" name="Jenis Klaim" required>
+                        </div>
+
+                        <!-- Tanggal Terima -->
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggalTerima" class="form-label">Tanggal Terima <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima" required>
+                        </div>
+
+                        <!-- Tanggal Rekam -->
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggalRekam" class="form-label">Tanggal Rekam <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="tanggalRekam" name="Tanggal Rekam" required>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="Status">
+                                <option value="Diterima">Diterima</option>
+                                <option value="Ditolak">Ditolak</option>
+                                <option value="Pending">Pending</option>
+                            </select>
+                        </div>
+
+                        <!-- Tanggal Meninggal -->
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
+                            <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
+                        </div>
+
+                        <!-- Keterangan -->
+                        <div class="col-12 mb-3">
+                            <label for="keterangan" class="form-label">Keterangan</label>
+                            <input type="text" class="form-control" id="keterangan" name="Keterangan">
+                        </div>
+
+                        <!-- Alamat -->
+                        <div class="col-12 mb-3">
+                            <label for="alamat" class="form-label">Alamat</label>
+                            <textarea class="form-control" id="alamat" name="Alamat" rows="2"></textarea>
+                        </div>
+
+                        <!-- Petugas -->
+                        <div class="col-12 mb-3">
+                            <label for="petugas" class="form-label">Petugas</label>
+                            <input type="text" class="form-control" id="petugas" name="Petugas">
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    Batal
+                </button>
+                <button type="submit" form="formTambah" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>
+                    Simpan Data
+                </button>
+            </div>
+            
         </div>
     </div>
+</div>
+
 
     <!-- Modal Hapus -->
     <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
