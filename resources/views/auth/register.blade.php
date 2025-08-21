@@ -13,76 +13,189 @@
     <!-- Memuat Tailwind CSS dari CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --bpjs-dark-green: #00643B;
+            --bpjs-light-green: #009944;
+            --bpjs-text-color: #1a202c;
+            --bpjs-border-color: #e2e8f0;
+            --bpjs-bg-light-1: #f0fdf4;
+            --bpjs-bg-light-2: #d1fae5;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, var(--bpjs-bg-light-1), var(--bpjs-bg-light-2));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .register-container {
+            max-width: 450px;
+            width: 100%;
+            background: linear-gradient(to bottom, #ffffff, var(--bpjs-bg-light-1));
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .header-register {
+            color: var(--bpjs-text-color);
+            margin-bottom: 2rem;
+            font-weight: 700;
+            font-size: 2.25rem; /* text-4xl */
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--bpjs-border-color);
+            border-radius: 0.5rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: var(--bpjs-light-green);
+            box-shadow: 0 0 0 4px rgba(0, 153, 68, 0.2);
+        }
+
+        .btn-bpjs-green {
+            width: 100%;
+            background: linear-gradient(to right, var(--bpjs-light-green), var(--bpjs-dark-green));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 153, 68, 0.3);
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-bpjs-green:hover {
+            background: linear-gradient(to right, var(--bpjs-dark-green), var(--bpjs-light-green));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 153, 68, 0.5);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            border: 2px solid var(--bpjs-light-green);
+            color: var(--bpjs-light-green);
+            background-color: transparent;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0, 153, 68, 0.1);
+        }
+
+        .alert-error {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+            text-align: left;
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .login-link {
+            text-decoration: underline;
+            color: #4a5568;
+            font-size: 0.875rem;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-blue-50 p-4">
+<body>
 
-    <!-- Kontainer utama form pendaftaran -->
-    <div class="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl shadow-2xl">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Buat Akun Baru</h1>
-            <p class="text-gray-500">Silakan isi formulir di bawah ini.</p>
-        </div>
+<div class="register-container">
+    <h1 class="header-register">Buat Akun Baru</h1>
+    
+    <!-- Formulir Pendaftaran -->
+    <form action="{{ route('register') }}" method="POST">
+        @csrf
         
-        <!-- Formulir Pendaftaran -->
-        <form action="{{ route('register') }}" method="POST" class="space-y-6">
-            @csrf
-            
-            <!-- Bidang Nama -->
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-                <input type="text" id="name" name="name" required autofocus autocomplete="name"
-                        class="mt-1 block w-full px-4 py-2 border @error('name') border-red-500 @else border-gray-300 @enderror rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                @error('name')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
-            </div>
+        <!-- Bidang Nama -->
+        <div class="form-group">
+            <label for="name" class="form-label">Nama</label>
+            <input type="text" id="name" name="name" required autofocus autocomplete="name"
+                    class="form-input" value="{{ old('name') }}">
+            @error('name')
+                <p class="alert-error">{{ $message }}</p>
+            @enderror
+        </div>
 
-            <!-- Bidang Email -->
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
-                <input type="email" id="email" name="email" required autocomplete="username"
-                        class="mt-1 block w-full px-4 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                @error('email')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
-            </div>
+        <!-- Bidang Email -->
+        <div class="form-group">
+            <label for="email" class="form-label">Alamat Email</label>
+            <input type="email" id="email" name="email" required autocomplete="username"
+                    class="form-input" value="{{ old('email') }}">
+            @error('email')
+                <p class="alert-error">{{ $message }}</p>
+            @enderror
+        </div>
 
-            <!-- Bidang Kata Sandi -->
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
-                <input type="password" id="password" name="password" required autocomplete="new-password"
-                        class="mt-1 block w-full px-4 py-2 border @error('password') border-red-500 @else border-gray-300 @enderror rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                @error('password')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
-            </div>
+        <!-- Bidang Kata Sandi -->
+        <div class="form-group">
+            <label for="password" class="form-label">Kata Sandi</label>
+            <input type="password" id="password" name="password" required autocomplete="new-password"
+                    class="form-input">
+            @error('password')
+                <p class="alert-error">{{ $message }}</p>
+            @enderror
+        </div>
 
-            <!-- Bidang Konfirmasi Kata Sandi -->
-            <div>
-                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Kata Sandi</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password"
-                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors">
-            </div>
+        <!-- Bidang Konfirmasi Kata Sandi -->
+        <div class="form-group">
+            <label for="password_confirmation" class="form-label">Konfirmasi Kata Sandi</label>
+            <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password"
+                    class="form-input">
+        </div>
 
-            <!-- Bagian Tombol dan Tautan -->
-            <div class="flex items-center justify-between mt-6">
-                <!-- Tautan Sudah Terdaftar -->
-                <a href="/login" class="underline text-sm text-blue-600 hover:text-blue-800 font-medium">
-                    Sudah terdaftar?
-                </a>
-                
-                <!-- Tombol Daftar -->
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 transition-all duration-300">
-                    Daftar
-                </button>
-            </div>
-            
-        </form>
+        <!-- Tombol Daftar -->
+        <button type="submit" class="btn-bpjs-green mt-6">
+            Daftar
+        </button>
+        
+    </form>
+    
+    <!-- Tombol Kembali dan Tautan Sudah Terdaftar -->
+    <div class="flex items-center justify-between mt-4">
+        <a href="{{ route('welcome') }}" class="btn-secondary w-1/2 mr-2">
+            Kembali
+        </a>
+        <a href="{{ route('login') }}" class="underline text-sm text-gray-500 hover:text-gray-700 font-medium ml-2">
+            Sudah terdaftar?
+        </a>
     </div>
+</div>
 
 </body>
 </html>
