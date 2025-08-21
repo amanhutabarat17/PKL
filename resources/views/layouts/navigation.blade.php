@@ -12,18 +12,20 @@
         <div x-data="{ open: false }" class="relative flex items-center">
             <!-- Foto Profil -->
             <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-                alt="Foto Profil" class="w-10 h-10 rounded-full border-2 border-white shadow-md mr-2">
-
+                alt="Foto Profil" class="w-11 h-10 rounded-full border-2 border-white shadow-md mr-2">
+            <!-- Nama Pengguna -->
+            <span class="mr-3 text-white font-medium hidden md:block">{{ Auth::user()->name }}</span>
+            
             <!-- Tombol Trigger -->
             <button @click="open = !open"
-        class="flex items-center gap-1 bg-blue-100 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md shadow hover:bg-blue-200 transition">
-   <!-- {{ Auth::user()->name }} --> Menu
-    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" 
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 
-                 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 
-                 010-1.414z" 
-              clip-rule="evenodd" />
+    class="flex items-center gap-1 bg-gray-100 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-md shadow hover:bg-gray-200 transition">
+    Menu
+    <svg class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0
+                111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0
+                010-1.414z"
+                clip-rule="evenodd" />
     </svg>
 </button>
 
@@ -31,25 +33,25 @@
             <div x-show="open" @click.away="open = false"
                 class="absolute right-0 top-14 w-48 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 z-50">
                 <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150 ease-in-out">
                     📊 Beranda
                 </a>
                 <a href="{{ route('penugasan.index') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150 ease-in-out">
                     📝 Penugasan
                 </a>
                 <a href="{{ route('profile.edit') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150 ease-in-out">
                     👤 Profil
                 </a>
                 <a href="{{ route('tentang') }}"
-                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150 ease-in-out">
                     ℹ️ Tentang
                 </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                        class="flex w-full items-center gap-2 px-4 py-2 text-red-600 hover:bg-gray-100">
+                        class="flex w-full items-center gap-2 px-4 py-2 text-red-600 hover:bg-gray-100 transition duration-150 ease-in-out">
                         🚪 Keluar
                     </button>
                 </form>

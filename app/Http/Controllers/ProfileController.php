@@ -30,31 +30,35 @@ class ProfileController extends Controller
 
         // Menyimpan file avatar jika ada
         if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada dan pastikan path-nya tidak kosong
+            // Hapus avatar lama jika ada
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
 
-            // Simpan file baru ke folder public/avatars
-            // Laravel akan otomatis membuat nama file unik
+            // Simpan file baru ke folder public/avatars.
+            // Laravel akan otomatis membuat nama file unik.
             $path = $request->file('avatar')->store('avatars', 'public');
             
-            // Perbarui data user dengan path avatar baru
+            // Perbarui kolom 'avatar' dengan path penyimpanan lokal.
             $user->avatar = $path;
+            
+            // Perbarui kolom 'profile_photo_url' dengan URL yang bisa diakses publik.
+            // Ini akan menyelesaikan masalah "no such column" setelah Anda menjalankan migrasi.
+            $user->profile_photo_url = Storage::url($path);
         }
 
-        // Isi data dari request yang sudah divalidasi
+        // Isi data dari request yang sudah divalidasi.
         $user->fill($request->validated());
 
-        // Jika email berubah, kirim ulang verifikasi email
+        // Jika email berubah, kirim ulang verifikasi email.
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
-        // Simpan semua perubahan (termasuk path avatar baru jika ada)
+        // Simpan semua perubahan, termasuk path avatar baru dan URL-nya.
         $user->save();
 
-        // Redirect kembali ke halaman edit profil dengan pesan sukses
+        // Redirect kembali ke halaman edit profil dengan pesan sukses.
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

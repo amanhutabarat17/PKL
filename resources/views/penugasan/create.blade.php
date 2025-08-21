@@ -1,23 +1,91 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-extrabold text-white">Tambah Penugasan Baru</h1>
-    </div>
+<style>
+    /* Custom styles to match the provided image theme */
+    body {
+        background-color: #1a202c; /* Dark background to match the screenshot */
+    }
 
-    <div class="bg-gray-950  rounded-2xl shadow-lg p-6">
+    .form-container {
+        max-width: 42rem;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    .form-card {
+        background-color: #f0fdf4; /* Very light green, almost white */
+        border: 1px solid #10b981; /* Bright green border from the image header */
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+        padding: 2.5rem;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .form-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .form-title {
+        color: #1f2937; /* Dark gray for the title */
+    }
+
+    .form-label {
+        color: #374151; /* Medium gray for labels */
+    }
+
+    .form-input, .form-select, .form-textarea {
+        background-color: #ffffff; /* White input background */
+        border: 1px solid #d1d5db; /* Light gray border */
+        color: #1f2937; /* Dark gray text color */
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 0.75rem;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #4ade80; /* Brighter green focus border */
+        box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.4); /* Light green glow on focus */
+    }
+
+    .submit-button {
+        background-color: #10b981; /* Green button to match header */
+        color: #fff;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .submit-button:hover {
+        background-color: #059669; /* Darker green on hover */
+        transform: scale(1.05);
+    }
+    
+    .cancel-link {
+        color: #9ca3af; /* Gray for the cancel link */
+    }
+
+    .cancel-link:hover {
+        color: #d1d5db; /* Lighter gray on hover */
+    }
+</style>
+<div class="form-container">
+    <div class="form-card">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-extrabold form-title">Tambah Penugasan Baru</h1>
+        </div>
         <form action="{{ route('penugasan.store') }}" method="POST">
             @csrf
 
             <div class="mb-4">
-                <label for="nama_karyawan" class="block text-gray-300 text-sm font-bold mb-2">Nama Petugas</label>
-                <input type="text" id="nama_karyawan" name="nama_karyawan" class="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white transition-colors duration-200" required>
+                <label for="nama_karyawan" class="block form-label text-sm font-bold mb-2">Nama Petugas</label>
+                <input type="text" id="nama_karyawan" name="nama_karyawan" class="w-full px-4 py-3 rounded-xl focus:outline-none form-input" required>
             </div>
 
             <div class="mb-4">
-                <label for="kabupaten_id" class="block text-gray-300 text-sm font-bold mb-2">Kabupaten</label>
-                <select id="kabupaten_id" name="kabupaten_id" class="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white transition-colors duration-200" required>
+                <label for="kabupaten_id" class="block form-label text-sm font-bold mb-2">Kabupaten</label>
+                <select id="kabupaten_id" name="kabupaten_id" class="w-full px-4 py-3 rounded-xl focus:outline-none form-select" required>
                     <option value="">-- Pilih Kabupaten --</option>
                     @foreach ($kabupatens as $kabupaten)
                         <option value="{{ $kabupaten->id }}">{{ $kabupaten->nama_kabupaten }}</option>
@@ -26,22 +94,22 @@
             </div>
 
             <div class="mb-4">
-                <label for="kecamatan_id" class="block text-gray-300 text-sm font-bold mb-2">Kecamatan</label>
-                <select id="kecamatan_id" name="kecamatan_id" class="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white transition-colors duration-200" required>
+                <label for="kecamatan_id" class="block form-label text-sm font-bold mb-2">Kecamatan</label>
+                <select id="kecamatan_id" name="kecamatan_id" class="w-full px-4 py-3 rounded-xl focus:outline-none form-select" required>
                     <option value="">-- Pilih Kecamatan --</option>
                 </select>
             </div>
             
             <div class="mb-4">
-                <label for="alamat_lengkap" class="block text-gray-300 text-sm font-bold mb-2">Alamat Lengkap</label>
-                <textarea id="alamat_lengkap" name="alamat_lengkap" rows="3" class="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white transition-colors duration-200" required></textarea>
+                <label for="alamat_lengkap" class="block form-label text-sm font-bold mb-2">Alamat Lengkap</label>
+                <textarea id="alamat_lengkap" name="alamat_lengkap" rows="3" class="w-full px-4 py-3 rounded-xl focus:outline-none form-textarea" required></textarea>
             </div>
             
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline transition duration-200 transform hover:scale-105">
+            <div class="flex items-center justify-end space-x-4">
+                <a href="{{ route('penugasan.index') }}" class="font-semibold cancel-link">Batal</a>
+                <button type="submit" class="font-bold py-3 px-6 rounded-xl focus:outline-none focus:shadow-outline submit-button transform hover:scale-105">
                     Simpan Penugasan
                 </button>
-                <a href="{{ route('penugasan.index') }}" class="text-gray-400 hover:text-gray-200 font-semibold">Batal</a>
             </div>
         </form>
     </div>
