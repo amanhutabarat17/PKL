@@ -153,12 +153,7 @@
                             @endforeach
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="btn btn-sm tabledit-edit-button" data-id="{{ $row[0] }}" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm tabledit-save-button" data-id="{{ $row[0] }}" title="Simpan">
-                                        <i class="fas fa-save"></i>
-                                    </button>
+                                   
                                     <button class="btn btn-sm btnHapus" data-id="{{ $row[0] }}" data-nama="{{ $row[1] }}" title="Hapus">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -168,19 +163,25 @@
                     @endforeach
                 </tbody>
             </table>
-        @else
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Tidak ada data untuk ditampilkan.
-            </div>
-        @endif
+    @else
+    <div class="d-flex justify-content-between align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
+        <div class="alert alert-info text-center flex-grow-1 mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Tidak ada data untuk ditampilkan.
+        </div>
+        <button id="btnTambah" type="button" class="btn btn-success ms-3">
+            <i class="fas fa-plus me-2"></i> Tambah Data
+        </button>
+    </div>
+@endif
+
     </div>
 
     <!-- Modal Tambah -->
     <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="tambahModalLabel">
                         <i class="fas fa-plus-circle me-2"></i>
                         Tambah Data
@@ -422,54 +423,61 @@
             });
 
             // Tabledit inline edit
-            $('#excelTable').Tabledit({
-                url: '{{ route("excel.update") }}',
-                method: 'POST',
-                editButton: false,
-                deleteButton: false,
-                saveButton: false,
-                restoreButton: false,
-                buttons: {
-                    edit: {
-                        class: 'btn btn-sm tabledit-edit-button',
-                        html: '<i class="fas fa-edit"></i>',
-                        action: 'edit'
-                    },
-                    save: {
-                        class: 'btn btn-sm tabledit-save-button',
-                        html: '<i class="fas fa-save"></i>',
-                        action: 'save'
-                    }
-                },
-                columns: {
-                    identifier: [0, "ID"],
-                    editable: [
-                        @foreach($header as $i => $col)
-                            @if($i > 0)
-                                [{{ $i }}, "{{ addslashes($col) }}"],
-                            @endif
-                        @endforeach
-                    ]
-                },
-                onSuccess: function (data) {
-                    if (data.success) {
-                        showMessage('Data berhasil diupdate!', 'success');
-                    } else {
-                        showMessage('Gagal mengupdate data', 'error');
-                    }
-                },
-                onFail: function (jqXHR) {
-                    let errorMessage = 'Terjadi kesalahan saat update';
-                    try {
-                        const response = JSON.parse(jqXHR.responseText);
-                        if (response.message) errorMessage = response.message;
-                    } catch (e) {
-                        if (jqXHR.status === 419) errorMessage = 'Session expired.';
-                        else if (jqXHR.status === 500) errorMessage = 'Internal server error.';
-                    }
-                    showMessage(errorMessage, 'error');
-                }
-            });
+           // Init Tabledit
+$('#excelTable').Tabledit({
+    url: '{{ route("excel.update") }}',
+    method: 'POST',
+    editButton: false,
+    deleteButton: false,
+    saveButton: false,
+    restoreButton: false,
+    buttons: {}, // disable bawaan
+    columns: {
+        identifier: [0, "ID"],
+        editable: [
+            @foreach($header as $i => $col)
+                @if($i > 0)
+                    [{{ $i }}, "{{ addslashes($col) }}"],
+                @endif
+            @endforeach
+        ]
+    },
+    onSuccess: function (data, textStatus, jqXHR) {
+        if (data.success) {
+            showMessage(data.message ?? 'Data berhasil diperbarui!', 'success');
+        } else {
+            showMessage(data.message ?? 'Update gagal!', 'error');
+        }
+    },
+    onFail: function (jqXHR, textStatus, errorThrown) {
+        showMessage('Gagal update data: ' + errorThrown, 'error');
+    }
+});
+
+
+// Custom tombol Edit (toggle jadi Save)
+$(document).on("click", ".btnEdit", function () {
+    let id = $(this).data("id");
+    let $row = $("#excelTable").find("tr").filter(function () {
+        return $(this).find("td:first").text() == id;
+    });
+
+    // Kalau belum edit → masuk mode edit
+    if (!$row.hasClass("editing")) {
+        $row.find(".tabledit-edit-button").trigger("click");
+        $row.addClass("editing");
+        $(this).html('<i class="fas fa-save"></i>'); // ganti ikon jadi save
+        $(this).removeClass("btn-primary").addClass("btn-success");
+    } 
+    // Kalau sudah edit → simpan
+    else {
+        $row.find(".tabledit-save-button").trigger("click");
+        $row.removeClass("editing");
+        $(this).html('<i class="fas fa-edit"></i>'); // balik lagi ke edit
+        $(this).removeClass("btn-success").addClass("btn-primary");
+    }
+});
+
 
             // Reset form saat modal ditutup
             document.getElementById('tambahModal').addEventListener('hidden.bs.modal', function () {

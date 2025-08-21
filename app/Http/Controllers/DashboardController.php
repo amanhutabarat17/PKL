@@ -203,16 +203,16 @@ public function store(Request $request)
         $newNo = $lastNo + 1;
 
         Log::info("LastRow (real): {$lastRow}, LastNo: {$lastNo}, NewNo: {$newNo}");
-
+//Log::info("Data diterima oleh controller store():", $request->all());
         // Tambahkan data baru tepat di bawah lastRow
         $sheet->fromArray([
             $newNo,
             $request->Nama,
             $request->KPJ,
-            $request->input('Tanggal Terima'),
-            $request->input('Tanggal Rekam'),
+            $request->input('Tanggal_Terima'),
+            $request->input('Tanggal_Rekam'),
             $request->Status,
-            $request->input('Tanggal Meninggal'),
+            $request->input('Tanggal_Meninggal'),
             $request->Keterangan,
             $request->Alamat,
             $request->Petugas,
