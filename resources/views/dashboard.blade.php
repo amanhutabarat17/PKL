@@ -61,44 +61,118 @@
             background-color: #157347;
         }
 
-        /* Fix untuk tombol edit Tabledit yang hilang */
+        /* ================================
+           Styling tombol aksi (Edit, Simpan, Hapus) - DIPERBAIKI
+        ================================= */
+        
+        /* Container untuk tombol aksi - Target yang lebih spesifik */
+        .tabledit-toolbar,
+        .d-flex.gap-1,
+        td .tabledit-toolbar {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 5px !important; /* jarak konsisten antar tombol */
+            flex-wrap: nowrap !important;
+            min-width: fit-content !important;
+            white-space: nowrap !important;
+        }
+
+        /* Kolom aksi dengan lebar tetap */
+        #excelTable td:last-child,
+        table.dataTable td:last-child {
+            width: 130px !important;
+            min-width: 130px !important;
+            max-width: 130px !important;
+            text-align: left !important;
+            padding: 8px !important;
+            vertical-align: middle !important;
+        }
+
+        /* Header kolom aksi */
+        #excelTable th:last-child,
+        table.dataTable th:last-child {
+            width: 130px !important;
+            min-width: 130px !important;
+            max-width: 130px !important;
+            text-align: center !important;
+        }
+
+        /* Seragamkan ukuran semua tombol aksi dengan target lebih spesifik */
         .tabledit-edit-button,
         .tabledit-save-button,
         .tabledit-confirm-button,
         .tabledit-delete-button,
-        .tabledit-restore-button {
-            display: inline-block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            padding: 2px 6px;
-            margin: 1px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            background-color: #f8f9fa;
-            color: #333;
-            text-decoration: none;
-            font-size: 12px;
-            cursor: pointer;
+        .tabledit-restore-button,
+        .btnHapus,
+        #excelTable .tabledit-edit-button,
+        #excelTable .tabledit-save-button,
+        #excelTable .btnHapus {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 35px !important;      
+            height: 35px !important;     
+            min-width: 35px !important;
+            min-height: 35px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;  
+            line-height: 1 !important;
+            color: #fff !important;
+            border: none !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease !important;
+            flex-shrink: 0 !important;
+            box-sizing: border-box !important;
         }
 
-        .tabledit-edit-button:hover {
-            background-color: #007bff;
-            color: white;
+        /* Warna-warna tombol dengan hover effects */
+        .btnHapus,
+        .tabledit-delete-button,
+        #excelTable .btnHapus {
+            background-color: #dc3545 !important;
+        }
+        .btnHapus:hover,
+        .tabledit-delete-button:hover,
+        #excelTable .btnHapus:hover {
+            background-color: #bb2d3b !important;
+            transform: scale(1.1) !important;
         }
 
-        .tabledit-save-button {
-            background-color: #28a745;
-            color: white;
-            border-color: #28a745;
+        .tabledit-edit-button,
+        #excelTable .tabledit-edit-button {
+            background-color: #0d6efd !important;
+        }
+        .tabledit-edit-button:hover,
+        #excelTable .tabledit-edit-button:hover {
+            background-color: #0b5ed7 !important;
+            transform: scale(1.1) !important;
         }
 
-        .tabledit-save-button:hover {
-            background-color: #218838;
+        .tabledit-save-button,
+        #excelTable .tabledit-save-button {
+            background-color: #198754 !important;
+        }
+        .tabledit-save-button:hover,
+        #excelTable .tabledit-save-button:hover {
+            background-color: #157347 !important;
+            transform: scale(1.1) !important;
         }
 
-        /* Pastikan kolom action terlihat */
-        .tabledit-toolbar {
-            min-width: 80px;
+        /* Reset semua margin dan spacing yang berpotensi menganggu */
+        .tabledit-toolbar > *,
+        .d-flex.gap-1 > * {
+            margin: 0 !important;
+            float: none !important;
+        }
+
+        /* Khusus untuk tombol dalam mode edit */
+        .tabledit-edit-mode .tabledit-toolbar {
+            display: flex !important;
+            gap: 5px !important;
         }
     </style>
 
@@ -107,7 +181,6 @@
 <body>
     @include('layouts.navigation')
     <div class="container-fluid p-4">
-
 
         <div id="message"></div>
 
@@ -132,12 +205,12 @@
                                 <td>{{ $cell ?? '' }}</td>
                             @endforeach
                             <td>
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-sm btn-danger btnHapus" data-id="{{ $row[0] }}"
-                                        data-nama="{{ $row[1] }}" title="Hapus">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
+                                <button class="btn btn-sm btnHapus tabledit-delete-button" 
+                                        data-id="{{ $row[0] }}"
+                                        data-nama="{{ $row[1] }}" 
+                                        title="Hapus">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </td>
                         </tr>
                     @endforeach
@@ -266,7 +339,7 @@
         $(document).ready(function () {
             let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
 
-            // Klik tombol hapus
+            // Klik tombol hapus manual
             $(document).on('click', '.btnHapus', function () {
                 const id = $(this).data('id');
                 const nama = $(this).data('nama');
@@ -396,23 +469,22 @@
                 });
             });
 
-
             // Tabledit inline edit
             $('#excelTable').Tabledit({
                 url: '{{ route("excel.update") }}',
                 method: 'POST',
                 editButton: true,
-                deleteButton: false,
+                deleteButton: false, 
                 saveButton: true,
                 restoreButton: false,
                 buttons: {
                     edit: {
-                        class: 'btn btn-sm btn-primary tabledit-edit-button',
+                        class: 'btn btn-sm tabledit-edit-button',
                         html: '<i class="fas fa-edit"></i>',
                         action: 'edit'
                     },
                     save: {
-                        class: 'btn btn-sm btn-success tabledit-save-button',
+                        class: 'btn btn-sm tabledit-save-button',
                         html: '<i class="fas fa-save"></i>',
                         action: 'save'
                     }
@@ -425,7 +497,7 @@
                                 [{{ $i }}, "{{ addslashes($col) }}"],
                             @endif
                         @endforeach
-            ]
+                    ]
                 },
                 onSuccess: function (data) {
                     if (data.success) {
@@ -444,6 +516,24 @@
                         else if (jqXHR.status === 500) errorMessage = 'Internal server error.';
                     }
                     showMessage(errorMessage, 'error');
+                },
+                onDraw: function () {
+                    // Setelah tabledit membuat tombol edit/save, kita gabungkan dengan tombol hapus
+                    $('#excelTable tbody tr').each(function() {
+                        const $row = $(this);
+                        const $lastCell = $row.find('td:last-child');
+                        const $hapusBtn = $lastCell.find('.btnHapus');
+                        const $toolbar = $lastCell.find('.tabledit-toolbar');
+                        
+                        // Jika ada toolbar tabledit dan tombol hapus terpisah
+                        if ($toolbar.length && $hapusBtn.length) {
+                            // Pindahkan tombol hapus ke dalam toolbar
+                            $toolbar.append($hapusBtn);
+                        } else if ($hapusBtn.length && !$toolbar.length) {
+                            // Jika belum ada toolbar, buat wrapper toolbar untuk tombol hapus
+                            $hapusBtn.wrap('<div class="tabledit-toolbar"></div>');
+                        }
+                    });
                 }
             });
 
@@ -455,5 +545,4 @@
     </script>
 
 </body>
-
 </html>
