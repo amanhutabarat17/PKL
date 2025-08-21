@@ -73,12 +73,16 @@ class DashboardController extends Controller
 
     public function update(Request $request)
     {
-        try {
-            $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+       try {
+        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx'); // <-- disamakan
+        Log::info("Path Excel: " . $path);
 
-            if (!file_exists($path)) {
-                return response()->json(['success' => false, 'message' => 'File tidak ditemukan']);
-            }
+        if (!file_exists($path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File Excel tidak ditemukan di: ' . $path
+            ]);
+        }
 
             $spreadsheet = IOFactory::load($path);
             $sheet = $spreadsheet->getActiveSheet();
@@ -168,58 +172,63 @@ class DashboardController extends Controller
             ]);
         }
     }
-    public function store(Request $request)
+public function store(Request $request)
 {
     try {
-        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx'); // pastikan sama dengan index/update/delete
+        Log::info("Path Excel: " . $path);
+
         if (!file_exists($path)) {
-            return response()->json(['success' => false, 'message' => 'File tidak ditemukan']);
+            return response()->json([
+                'success' => false,
+                'message' => 'File Excel tidak ditemukan di: ' . $path
+            ]);
         }
 
         $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Cari baris dan nomor terakhir yang ada di kolom A (No)
+        // Cari baris terakhir yang benar-benar ada nomor di kolom A
         $highestRow = $sheet->getHighestRow();
-        $nextRow = $highestRow + 1;
-
-        // Cari nomor terakhir yang valid di kolom A
-        $lastValidNo = 0;
-        for ($row = 2; $row <= $highestRow; $row++) {
-            $currentNo = $sheet->getCell("A$row")->getValue();
-            if (is_numeric($currentNo)) {
-                $lastValidNo = max($lastValidNo, (int)$currentNo);
+        $lastRow = 1;
+        for ($row = $highestRow; $row >= 1; $row--) {
+            $val = $sheet->getCell('A' . $row)->getValue();
+            if (!empty($val) && is_numeric($val)) {
+                $lastRow = $row;
+                break;
             }
         }
 
-        // Jika tidak ada nomor yang valid atau file baru, mulai dari 1
-        $newNo = $lastValidNo > 0 ? $lastValidNo + 1 : 1;
+        $lastNo = (int) $sheet->getCell('A' . $lastRow)->getValue();
+        $newNo = $lastNo + 1;
 
-        // Jika Anda ingin memastikan selalu dimulai dari 6 jika sebelumnya 5
-        // $newNo = max($lastValidNo + 1, 6);
+        Log::info("LastRow (real): {$lastRow}, LastNo: {$lastNo}, NewNo: {$newNo}");
 
-        // Tambah data baru sesuai header
-        $sheet->setCellValue("A$nextRow", $newNo);
-        $sheet->setCellValue("B$nextRow", $request->input('Nama'));
-        $sheet->setCellValue("C$nextRow", $request->input('KPJ'));
-        $sheet->setCellValue("D$nextRow", $request->input('Tanggal Terima'));
-        $sheet->setCellValue("E$nextRow", $request->input('Tanggal Rekam'));
-        $sheet->setCellValue("F$nextRow", $request->input('Status'));
-        $sheet->setCellValue("G$nextRow", $request->input('Tanggal Meninggal'));
-        $sheet->setCellValue("H$nextRow", $request->input('Keterangan'));
-        $sheet->setCellValue("I$nextRow", $request->input('Alamat'));
-        $sheet->setCellValue("J$nextRow", $request->input('Petugas'));
+        // Tambahkan data baru tepat di bawah lastRow
+        $sheet->fromArray([
+            $newNo,
+            $request->Nama,
+            $request->KPJ,
+            $request->input('Tanggal Terima'),
+            $request->input('Tanggal Rekam'),
+            $request->Status,
+            $request->input('Tanggal Meninggal'),
+            $request->Keterangan,
+            $request->Alamat,
+            $request->Petugas,
+        ], null, 'A' . ($lastRow + 1));
 
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data berhasil ditambahkan',
-            'new_number' => $newNo
-        ]);
+        Log::info("Data berhasil disimpan!");
+        return response()->json(['success' => true, 'message' => 'Data berhasil disimpan!']);
     } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        Log::error("Gagal Store: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
     }
 }
 

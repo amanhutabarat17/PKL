@@ -9,13 +9,7 @@
 </head>
 <body class="bg-gray-950 text-white font-sans">
 
-    {{-- Navbar --}}
-    <nav class="bg-gray-900 shadow-md">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-blue-400">Dashboard Penugasan</h1>
-            <a href="{{ route('keluar') }}" class="text-sm text-slate-300 hover:text-red-400 transition">Keluar</a>
-        </div>
-    </nav>
+    @include('layouts.navigation')
 
     {{-- Konten Utama --}}
     <main class="container mx-auto px-6 py-8">
