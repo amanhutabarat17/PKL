@@ -38,7 +38,7 @@ class LoginController extends Controller
         if ($user && $user->email_verified_at) {
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
-                return redirect()->intended('dashboard');
+                return redirect()->intended('bpjs-ketenagakerjaan');
             }
         }
 

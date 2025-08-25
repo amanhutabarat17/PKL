@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BpjsKetenagakerjaanController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +54,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/excel/store', [DashboardController::class, 'store'])->name('excel.store');
     Route::post('/excel/delete', [DashboardController::class, 'delete'])->name('excel.delete');
 
+    // BPJS Ketenagakerjaan
+    Route::get('/bpjs-ketenagakerjaan', [BpjsKetenagakerjaanController::class, 'index'])->name('bpjs.ketenagakerjaan');
+    Route::post('/bpjs-ketenagakerjaan', [BpjsKetenagakerjaanController::class, 'store'])->name('bpjs.ketenagakerjaan.store');
+    Route::delete('/bpjs-ketenagakerjaan/{photo}', [BpjsKetenagakerjaanController::class, 'destroy'])->name('bpjs.ketenagakerjaan.destroy');
     // Halaman Tentang
     Route::get('/tentang', fn () => view('tentang'))->name('tentang');
 
@@ -59,13 +65,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-  Route::get('/destroy', function () {
+    Route::get('/destroy', function () {
 
 })->name('penugasan.destroy');
-    // Penugasan
-    Route::get('/get-kecamatan/{kabupaten_id}', [PenugasanController::class, 'getKecamatan']);
    // Route::resource('penugasan', PenugasanController::class);
-   Route::get('/keluar', function () {
+    Route::get('/keluar', function () {
     session()->invalidate();
     session()->regenerateToken();
     return redirect('/');

@@ -11,9 +11,14 @@
             --bpjs-start-color: #008080; /* Biru kehijauan tua */
             --bpjs-end-color: #009944; /* Hijau terang */
         }
-
+        {
+         --bpjs-bg-light-1: #f0fdf4;
+            --bpjs-bg-light-2: #d1fae5;
+        }
         body {
-            background-color: #f0f2f5;
+             font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, var(--bpjs-bg-light-1), var(--bpjs-bg-light-2));
+            background-color: #d1fae5;
             min-height: 100vh;
         }
 
@@ -104,8 +109,8 @@
             </ul>
 
             <div class="mt-5 d-flex justify-content-between align-items-center">
-                <a href="{{ url('/dashboard') }}" class="btn btn-bpjs-green">
-                    <i class="fas fa-arrow-left me-2"></i> Kembali ke Dashboard
+                <a href="{{ url('/bpjs-ketenagakerjaan') }}" class="btn btn-bpjs-green">
+                    <i class="fas fa-arrow-left me-2"></i> Kembali
                 </a>
                 <p class="text-end text-muted mb-0"><strong>Pengembang:</strong> Tim PKL BPJS Ketenagakerjaan Medan Kota</p>
             </div>
