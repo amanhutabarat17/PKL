@@ -1,513 +1,669 @@
-<!DOCTYPE html>
-<html>
+# app.py
+import io
+import re
+from datetime import datetime
 
-<head>
-    <title>Dashboard</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+import pandas as pd
+import streamlit as st
+import plotly.express as px
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+# ========================= CONFIG =========================
+st.set_page_config(page_title="KPI Dashboard", layout="wide")
+st.title("📊 KPI Dashboard – Mingguan ➜ Bulanan ➜ Tahunan (Auto Detect)")
 
-    <style>
-        table.dataTable td {
-            vertical-align: middle;
-        }
+# ========================= CONSTANTS ======================
+ID_MONTHS = [
+    "januari", "februari", "maret", "april", "mei", "juni",
+    "juli", "agustus", "september", "oktober", "november", "desember"
+]
+MONTH_ORDER = {m: i for i, m in enumerate(ID_MONTHS, start=1)}
+WEEK_LABELS = ["minggu 1", "minggu 2", "minggu 3", "minggu 4", "target"]
+CATS = ["SKA", "NON SKA", "NA"]
 
-        .alert {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-        }
+EN_TO_ID_MONTH = {
+    "january": "januari", "february": "februari", "march": "maret",
+    "april": "april", "may": "mei", "june": "juni", "july": "juli",
+    "august": "agustus", "september": "september", "october": "oktober",
+    "november": "november", "december": "desember"
+}
 
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
 
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+# ========================= HELPERS ========================
+def norm(s):
+    if pd.isna(s):
+        return ""
+    s = str(s).replace("\u00A0", " ").strip().lower()
+    s = re.sub(r"\s+", " ", s)
+    return s
 
-        #excelTable_wrapper {
-            margin-top: 20px;
-        }
 
-        /* Style untuk posisi button di samping search */
-        .dataTables_wrapper .dataTables_filter {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+def month_of_token(token):
+    t = norm(token)
+    # dukung Indonesia & English
+    if t in ID_MONTHS:
+        return t
+    if t in EN_TO_ID_MONTH:
+        return EN_TO_ID_MONTH[t]
+    return None
 
-        /* Custom button styling */
-        #btnTambah {
-            background-color: #198754;
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
 
-        #btnTambah:hover {
-            background-color: #157347;
-        }
+def week_from_token(token):
+    t = norm(token)
+    if "target" in t:
+        return "target"
+    m = re.search(r"minggu\s*(ke\s*)?(\d)", t)
+    if m:
+        return f"minggu {m.group(2)}"
+    return None
 
-        /* ================================
-           Styling tombol aksi (Edit, Simpan, Hapus)
-        ================================= */
-        /* Tombol aksi seragam & kecil */
-        .tabledit-toolbar,
-        .d-flex.gap-1 {
-            display: inline-flex !important;
-            align-items: center;
-            gap: 4px; /* jarak kecil antar tombol */
-        }
 
-        /* Seragamkan ukuran semua tombol aksi */
-        .btn-aksi,
-        .tabledit-edit-button,
-        .tabledit-save-button,
-        .tabledit-confirm-button,
-        .tabledit-delete-button,
-        .tabledit-restore-button,
-        .btnHapus {
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            width: 30px;      /* ukuran konsisten */
-            height: 30px;     /* ukuran konsisten */
-            padding: 0;
-            margin: 0;
-            border-radius: 6px;
-            font-size: 14px;  /* ikon pas */
-            line-height: 1;
-            color: #fff !important;
-            border: none !important;
-            cursor: pointer;
-        }
+def try_read_excel(file) -> pd.DataFrame:
+    # Baca dengan header 2 baris (sesuai file kamu), fallback ke header tunggal
+    for hdr in ([0, 1], [0], None):
+        try:
+            if hdr is None:
+                return pd.read_excel(file, engine="openpyxl")
+            return pd.read_excel(file, engine="openpyxl", header=hdr)
+        except Exception:
+            try:
+                if hdr is None:
+                    return pd.read_excel(file)
+                return pd.read_excel(file, header=hdr)
+            except Exception:
+                continue
+    raise ValueError("Tidak dapat membaca file Excel.")
 
-        /* Warna-warna tombol */
-        .btnHapus,
-        .tabledit-delete-button {
-            background-color: #dc3545 !important;
-        }
 
-        .btnHapus:hover,
-        .tabledit-delete-button:hover {
-            background-color: #bb2d3b !important;
-        }
+def build_long_and_target_from_multidx(df_raw: pd.DataFrame):
+    """
+    VERSI DIPERBAIKI: SKIP baris dengan nilai 0 atau kosong + validasi kategori ketat + anti duplikasi
+    Format Excel:
+      - Header 2 baris (MultiIndex)
+      - Kolom awal: Nama, Kategori (sering merge → di-ffill)
+      - Per bulan ada Minggu 1..4 + 1 kolom TARGET
+    """
+    if not isinstance(df_raw.columns, pd.MultiIndex):
+        raise ValueError("File tidak memiliki header 2 baris. Pastikan format sesuai Excel kamu.")
 
-        .tabledit-edit-button {
-            background-color: #0d6efd !important;
-        }
+    # deteksi kolom nama & kategori
+    nama_col = None
+    kat_col = None
+    for col in df_raw.columns:
+        a, b = col
+        if nama_col is None and ("nama" in norm(a) or "nama" in norm(b)):
+            nama_col = col
+        if kat_col is None and ("kategori" in norm(a) or "kategori" in norm(b)):
+            kat_col = col
 
-        .tabledit-edit-button:hover {
-            background-color: #0b5ed7 !important;
-        }
+    # fallback aman ke 2 kolom pertama
+    if nama_col is None:
+        nama_col = df_raw.columns[0]
+    if kat_col is None:
+        kat_col = df_raw.columns[1]
 
-        .tabledit-save-button {
-            background-color: #198754 !important;
-        }
+    df = df_raw.copy()
+    
+    # ffill nama & kategori (karena merge cell di Excel)
+    df[nama_col] = df[nama_col].ffill()
+    df[kat_col] = df[kat_col].ffill()
 
-        .tabledit-save-button:hover {
-            background-color: #157347 !important;
-        }
-    </style>
+    # TAMBAHAN: Bersihkan baris yang nama kosong atau invalid
+    df = df[df[nama_col].notna()]
+    df = df[df[nama_col].astype(str).str.strip() != ""]
+    df = df[df[nama_col].astype(str).str.lower() != "nan"]
 
-</head>
+    long_rows = []
+    target_rows = []
+    last_month = None
+    processed_columns = set()  # Track kolom yang sudah diproses
+    
+    # Set untuk mencegah duplikasi data
+    seen_long_data = set()
+    seen_target_data = set()
 
-<body>
-    @include('layouts.navigation')
-    <div class="container-fluid p-4">
-
-        <div id="message"></div>
-
-        @if(isset($error))
-            <div class="alert alert-error">{{ $error }}</div>
-        @endif
-
-        @if(!empty($header) && !empty($rows))
-            <table id="excelTable" class="display" style="width:100%">
-                <thead>
-                    <tr>
-                        @foreach($header as $head)
-                            <th>{{ $head }}</th>
-                        @endforeach
-                        <th style="text-align: center; vertical-align: middle;"> Aksi </th> <!-- Tambahan kolom aksi -->
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($rows as $row)
-                        <tr>
-                            @foreach($row as $cell)
-                                <td>{{ $cell ?? '' }}</td>
-                            @endforeach
-                            <td>
-                                <div class="d-flex gap-1">
-                                   
-                                    <button class="btn btn-sm btnHapus" data-id="{{ $row[0] }}" data-nama="{{ $row[1] }}" title="Hapus">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-    @else
-    <div class="d-flex justify-content-between align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
-        <div class="alert alert-info text-center flex-grow-1 mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-            Tidak ada data untuk ditampilkan.
-        </div>
-        <button id="btnTambah" type="button" class="btn btn-success ms-3">
-            <i class="fas fa-plus me-2"></i> Tambah Data
-        </button>
-    </div>
-@endif
-
-    </div>
-
-    <!-- Modal Tambah -->
-<div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    # iterate kolom sesuai urutan tampil di Excel
+    for col in df.columns:
+        if col in [nama_col, kat_col]:
+            continue
             
-            <!-- Header -->
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="tambahModalLabel">
-                    <i class="fas fa-plus-circle me-2"></i>
-                    Tambah Data
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+        a, b = col  # level-0, level-1
+        m = month_of_token(a)
+        w = week_from_token(b)
 
-            <!-- Body -->
-            <div class="modal-body">
-                <form id="formTambah">
-                    <div class="row">
+        if m:
+            last_month = m
+            # nilai mingguan
+            if w and w != "target":
+                col_key = f"{m}_{w}"
+                if col_key in processed_columns:
+                    continue
+                processed_columns.add(col_key)
+                
+                vals = df[col].tolist()
+                for idx, v in enumerate(vals):
+                    if idx >= len(df):
+                        break
                         
-                        <!-- Nama -->
-                        <div class="col-md-6 mb-3">
-                            <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama" name="Nama" required>
-                        </div>
+                    nm = str(df[nama_col].iloc[idx]).strip()
+                    kt_raw = str(df[kat_col].iloc[idx]).strip()
+                    
+                    # Skip jika nama kosong
+                    if nm == "" or nm == "nan" or pd.isna(nm):
+                        continue
 
-                        <!-- KPJ -->
-                        <div class="col-md-6 mb-3">
-                            <label for="kpj" class="form-label">KPJ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="kpj" name="KPJ" required>
-                        </div>
+                    # Validasi dan normalisasi kategori
+                    kt = kt_raw.upper().strip()
+                    # Hanya terima kategori yang benar-benar valid
+                    if kt not in ["SKA", "NON SKA"]:
+                        # Coba deteksi pattern
+                        if "ska" in kt_raw.lower() and "non" not in kt_raw.lower():
+                            kt = "SKA"
+                        elif "non" in kt_raw.lower() and "ska" in kt_raw.lower():
+                            kt = "NON SKA"
+                        else:
+                            # Set ke NA hanya jika benar-benar tidak jelas
+                            kt = "NA"
 
-                        <!-- Jenis Klaim -->
-                        <div class="col-md-6 mb-3">
-                            <label for="jenisKlaim" class="form-label">Jenis Klaim <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="jenisKlaim" name="Jenis Klaim" required>
-                        </div>
+                    # Validasi nilai - hanya tambahkan jika > 0
+                    try:
+                        val = float(v) if pd.notna(v) and str(v).strip() != "" else 0.0
+                    except:
+                        val = 0.0
 
-                        <!-- Tanggal Terima -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggalTerima" class="form-label">Tanggal Terima <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima" required>
-                        </div>
+                    # *** HANYA TAMBAHKAN JIKA NILAI > 0 DAN BELUM PERNAH ADA ***
+                    if val > 0:
+                        # Buat unique key untuk deteksi duplikasi
+                        unique_key = (nm, kt, m, w, val)
+                        if unique_key not in seen_long_data:
+                            seen_long_data.add(unique_key)
+                            long_rows.append([nm, kt, m, w, val, None])
+                        
+        elif last_month is not None:
+            # kolom 'TARGET' muncul setelah blok bulan → gunakan last_month
+            if "target" in norm(a) or "target" in norm(b):
+                target_key = f"{last_month}_target"
+                if target_key in processed_columns:
+                    continue
+                processed_columns.add(target_key)
+                
+                vals = df[col].tolist()
+                for idx, v in enumerate(vals):
+                    if idx >= len(df):
+                        break
+                        
+                    nm = str(df[nama_col].iloc[idx]).strip()
+                    kt_raw = str(df[kat_col].iloc[idx]).strip()
+                    
+                    if nm == "" or nm == "nan" or pd.isna(nm):
+                        continue
 
-                        <!-- Tanggal Rekam -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggalRekam" class="form-label">Tanggal Rekam <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="tanggalRekam" name="Tanggal Rekam" required>
-                        </div>
+                    # Sama dengan validasi kategori di atas
+                    kt = kt_raw.upper().strip()
+                    if kt not in ["SKA", "NON SKA"]:
+                        if "ska" in kt_raw.lower() and "non" not in kt_raw.lower():
+                            kt = "SKA"
+                        elif "non" in kt_raw.lower() and "ska" in kt_raw.lower():
+                            kt = "NON SKA"
+                        else:
+                            kt = "NA"
 
-                        <!-- Status -->
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-control" id="status" name="Status">
-                                <option value="Diterima">Diterima</option>
-                                <option value="Ditolak">Ditolak</option>
-                                <option value="Pending">Pending</option>
-                            </select>
-                        </div>
+                    try:
+                        val = float(v) if pd.notna(v) and str(v).strip() != "" else 0.0
+                    except:
+                        val = 0.0
 
-                        <!-- Tanggal Meninggal -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
-                            <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
-                        </div>
+                    # *** HANYA TAMBAHKAN TARGET JIKA > 0 DAN BELUM PERNAH ADA ***
+                    if val > 0:
+                        # Buat unique key untuk deteksi duplikasi target
+                        unique_key = (nm, kt, last_month, val)
+                        if unique_key not in seen_target_data:
+                            seen_target_data.add(unique_key)
+                            target_rows.append([nm, kt, last_month, val, None])
 
-                        <!-- Keterangan -->
-                        <div class="col-12 mb-3">
-                            <label for="keterangan" class="form-label">Keterangan</label>
-                            <input type="text" class="form-control" id="keterangan" name="Keterangan">
-                        </div>
+    long_df = pd.DataFrame(long_rows, columns=["Nama", "Kategori", "bulan", "minggu", "nilai", "Tahun"])
+    target_df = pd.DataFrame(target_rows, columns=["Nama", "Kategori", "bulan", "target", "Tahun"])
 
-                        <!-- Alamat -->
-                        <div class="col-12 mb-3">
-                            <label for="alamat" class="form-label">Alamat</label>
-                            <textarea class="form-control" id="alamat" name="Alamat" rows="2"></textarea>
-                        </div>
+    # TAMBAHAN: Double-check untuk menghapus duplikasi jika masih ada
+    long_df = long_df.drop_duplicates(subset=["Nama", "Kategori", "bulan", "minggu", "nilai"], keep="first")
+    target_df = target_df.drop_duplicates(subset=["Nama", "Kategori", "bulan", "target"], keep="first")
 
-                        <!-- Petugas -->
-                        <div class="col-12 mb-3">
-                            <label for="petugas" class="form-label">Petugas</label>
-                            <input type="text" class="form-control" id="petugas" name="Petugas">
-                        </div>
+    # Pastikan kategori sesuai standar
+    long_df["bulan"] = pd.Categorical(long_df["bulan"], categories=ID_MONTHS, ordered=True)
+    target_df["bulan"] = pd.Categorical(target_df["bulan"], categories=ID_MONTHS, ordered=True)
 
-                    </div>
-                </form>
-            </div>
+    return long_df, target_df
 
-            <!-- Footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>
-                    Batal
-                </button>
-                <button type="submit" form="formTambah" class="btn btn-primary">
-                    <i class="fas fa-save me-1"></i>
-                    Simpan Data
-                </button>
-            </div>
+
+def month_total_by_category_complete(df_filtered):
+    """Sudah tidak perlu filter lagi karena data parsing sudah bersih"""
+    g = df_filtered.groupby(["bulan", "Kategori"], as_index=False)["nilai"].sum()
+    pivot = (g.pivot(index="bulan", columns="Kategori", values="nilai")
+             .reindex(ID_MONTHS)
+             .reindex(columns=CATS, fill_value=0)
+             .fillna(0))
+    out = pivot.reset_index().melt(id_vars="bulan", var_name="Kategori", value_name="nilai")
+    out["Kategori"] = out["Kategori"].astype(str)
+    return out
+
+
+def person_total(df_filtered, month_selected, period="Bulanan"):
+    """Sudah tidak perlu filter lagi karena data parsing sudah bersih"""
+    if period == "Tahunan":
+        d = (df_filtered.groupby(["Nama", "Kategori"], as_index=False)["nilai"].sum())
+    else:
+        d = (df_filtered[df_filtered["bulan"] == month_selected]
+             .groupby(["Nama", "Kategori"], as_index=False)["nilai"].sum())
+    return d.sort_values(["Kategori", "Nama"])
+
+
+def weekly_sum_by_category_complete(df_filtered, month_selected=None, period="Bulanan"):
+    """Sudah tidak perlu filter lagi karena data parsing sudah bersih"""
+    if period == "Tahunan":
+        d = df_filtered[df_filtered["minggu"].isin(["minggu 1", "minggu 2", "minggu 3", "minggu 4"])]
+    else:
+        d = df_filtered[(df_filtered["bulan"] == month_selected) &
+                        (df_filtered["minggu"].isin(["minggu 1", "minggu 2", "minggu 3", "minggu 4"]))]
+
+    g = d.groupby(["Kategori", "minggu"], as_index=False)["nilai"].sum()
+    weeks = ["minggu 1", "minggu 2", "minggu 3", "minggu 4"]
+    idx = pd.MultiIndex.from_product([CATS, weeks], names=["Kategori", "minggu"])
+    pivot = g.set_index(["Kategori", "minggu"]).reindex(idx, fill_value=0).reset_index()
+
+    # urutkan minggu 1..4
+    def wkey(x):
+        m = re.search(r"(\d+)", norm(x))
+        return int(m.group(1)) if m else 99
+
+    pivot["__k"] = pivot["minggu"].apply(wkey)
+    pivot = pivot.sort_values(["Kategori", "__k"]).drop(columns="__k")
+    return pivot
+
+
+def eval_target(long_df, target_df):
+    """Hitung total minggu 1..4 vs target per (Nama, Kategori, bulan, Tahun)."""
+    weekly = long_df[long_df["minggu"].isin(["minggu 1", "minggu 2", "minggu 3", "minggu 4"])]
+    actual = (weekly.groupby(["Nama", "Kategori", "bulan", "Tahun"], as_index=False)["nilai"].sum())
+    merged = pd.merge(actual, target_df, on=["Nama", "Kategori", "bulan", "Tahun"], how="left")
+    merged["target"] = merged["target"].fillna(0)
+    merged["Status"] = merged.apply(lambda r: "Tercapai" if r["nilai"] >= r["target"] else "Tidak Tercapai", axis=1)
+    merged = merged.sort_values(["bulan", "Kategori", "Nama"]).reset_index(drop=True)
+    return merged
+
+
+def yearly_percentage_by_name(long_df, target_df):
+    """
+    Persentase capai target per NAMA untuk 1 tahun:
+      pct = (sum nilai minggu1-4) / (sum target) * 100
+    """
+    weekly = long_df[long_df["minggu"].isin(["minggu 1", "minggu 2", "minggu 3", "minggu 4"])]
+    actual = weekly.groupby(["Nama", "Kategori", "Tahun"], as_index=False)["nilai"].sum()
+    target = target_df.groupby(["Nama", "Kategori", "Tahun"], as_index=False)["target"].sum()
+
+    merged = pd.merge(actual, target, on=["Nama", "Kategori", "Tahun"], how="outer").fillna(0)
+    by_name = merged.groupby(["Nama", "Tahun"], as_index=False).agg({"nilai": "sum", "target": "sum"})
+    by_name["Persentase"] = by_name.apply(lambda r: (r["nilai"] / r["target"] * 100) if r["target"] > 0 else 0, axis=1)
+    return by_name
+
+
+def to_excel_bytes(df_raw, long_df, month_sum, week_sum, person_sum, year_sum, target_df, eval_df, yearly_pct_df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        # Data
+        if isinstance(df_raw.columns, pd.MultiIndex):
+            df_raw.to_excel(writer, index=False, sheet_name="Raw")
+        else:
+            df_raw.copy().to_excel(writer, index=False, sheet_name="Raw")
+
+        long_df.to_excel(writer, index=False, sheet_name="Long")
+        target_df.to_excel(writer, index=False, sheet_name="Target_Long")
+        eval_df.to_excel(writer, index=False, sheet_name="Eval_Target")
+        yearly_pct_df.to_excel(writer, index=False, sheet_name="Yearly_Percentage")
+
+        month_sum.to_excel(writer, index=False, sheet_name="Monthly_Long")
+        week_sum.to_excel(writer, index=False, sheet_name="Weekly_Long")
+        person_sum.to_excel(writer, index=False, sheet_name="Person_Long")
+        year_sum.to_excel(writer, index=False, sheet_name="Yearly_Total")
+
+        # Pivot utk chart Excel
+        month_pivot = (month_sum.pivot(index="bulan", columns="Kategori", values="nilai")
+                       .reindex(ID_MONTHS).reindex(columns=CATS, fill_value=0)
+                       .fillna(0).reset_index())
+        week_pivot = (week_sum.pivot(index="minggu", columns="Kategori", values="nilai")
+                      .reindex(columns=CATS, fill_value=0).fillna(0).reset_index())
+        person_pivot = (person_sum.pivot(index="Nama", columns="Kategori", values="nilai")
+                        .reindex(columns=CATS, fill_value=0).fillna(0).reset_index())
+
+        month_pivot.to_excel(writer, index=False, sheet_name="Monthly")
+        week_pivot.to_excel(writer, index=False, sheet_name="Weekly")
+        person_pivot.to_excel(writer, index=False, sheet_name="PersonMonth")
+
+        wb = writer.book
+        # Chart Monthly (stacked)
+        ws_m = writer.sheets["Monthly"]
+        n_rows = len(month_pivot)
+        chart_m = wb.add_chart({"type": "column", "subtype": "stacked"})
+        for i, _cat in enumerate(CATS, start=1):
+            chart_m.add_series({
+                "name": ["Monthly", 0, i],
+                "categories": ["Monthly", 1, 0, n_rows, 0],
+                "values": ["Monthly", 1, i, n_rows, i],
+            })
+        chart_m.set_title({"name": "Total per Bulan (Stacked by Kategori)"})
+        ws_m.insert_chart("G2", chart_m)
+
+        # Chart Weekly (grouped)
+        ws_w = writer.sheets["Weekly"]
+        n_rows_w = len(week_pivot)
+        chart_w = wb.add_chart({"type": "column"})
+        for i, _cat in enumerate(CATS, start=1):
+            chart_w.add_series({
+                "name": ["Weekly", 0, i],
+                "categories": ["Weekly", 1, 0, n_rows_w, 0],
+                "values": ["Weekly", 1, i, n_rows_w, i],
+            })
+        chart_w.set_title({"name": "Nilai per Minggu (per Kategori)"})
+        ws_w.insert_chart("G2", chart_w)
+
+        # Chart Person (stacked)
+        ws_p = writer.sheets["PersonMonth"]
+        n_rows_p = len(person_pivot)
+        chart_p = wb.add_chart({"type": "column", "subtype": "stacked"})
+        for i, _cat in enumerate(CATS, start=1):
+            chart_p.add_series({
+                "name": ["PersonMonth", 0, i],
+                "categories": ["PersonMonth", 1, 0, n_rows_p, 0],
+                "values": ["PersonMonth", 1, i, n_rows_p, i],
+            })
+        chart_p.set_title({"name": "Total per Orang"})
+        ws_p.insert_chart("G2", chart_p)
+
+        # Chart Yearly Total
+        ws_y = writer.sheets["Yearly_Total"]
+        n_rows_y = len(year_sum)
+        chart_y = wb.add_chart({"type": "column"})
+        chart_y.add_series({
+            "name": "Total Tahunan",
+            "categories": ["Yearly_Total", 1, 0, n_rows_y, 0],
+            "values": ["Yearly_Total", 1, 1, n_rows_y, 1],
+            "data_labels": {"value": True},
+        })
+        chart_y.set_title({"name": "Total KPI per Tahun"})
+        ws_y.insert_chart("E2", chart_y)
+
+        # Chart Yearly Percentage
+        ws_yp = writer.sheets["Yearly_Percentage"]
+        if not yearly_pct_df.empty:
+            names = yearly_pct_df["Nama"].tolist()
+            vals = yearly_pct_df["Persentase"].tolist()
+            chart_pct = wb.add_chart({"type": "column"})
+            chart_pct.add_series({
+                "name": "Persentase Capaian (%)",
+                "categories": ["Yearly_Percentage", 1, 0, len(names), 0],
+                "values": ["Yearly_Percentage", 1, 3, len(vals), 3],
+                "data_labels": {"value": True},
+            })
+            chart_pct.set_title({"name": "Persentase Capaian Tahunan per Nama"})
+            ws_yp.insert_chart("F2", chart_pct)
+
+    return output.getvalue()
+
+
+def debug_data_info(df_raw, long_df, target_df, df_year):
+    """Fungsi untuk debugging informasi data"""
+    st.write("### 🔍 Debug Info")
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.write("**Data Raw:**")
+        st.write(f"Shape: {df_raw.shape}")
+        if isinstance(df_raw.columns, pd.MultiIndex):
+            st.write("✅ MultiIndex columns detected")
+        else:
+            st.write("❌ Single level columns")
+
+    with col2:
+        st.write("**Data Parsed:**")
+        st.write(f"Long DF: {long_df.shape[0]:,} rows")
+        st.write(f"Target DF: {target_df.shape[0]:,} rows")
+        st.write(f"Year filtered: {df_year.shape[0]:,} rows")
+
+    with col3:
+        st.write("**Nilai Statistics:**")
+        total_nilai = df_year["nilai"].sum()
+        min_nilai = df_year["nilai"].min() if len(df_year) > 0 else 0
+        max_nilai = df_year["nilai"].max() if len(df_year) > 0 else 0
+        st.write(f"Total: {total_nilai:,.2f}")
+        st.write(f"Range: {min_nilai:.2f} - {max_nilai:.2f}")
+
+    with col4:
+        st.write("**Kategori Distribution:**")
+        if not df_year.empty:
+            cat_counts = df_year["Kategori"].value_counts()
+            for cat, count in cat_counts.items():
+                total_cat = df_year[df_year["Kategori"] == cat]["nilai"].sum()
+                st.write(f"{cat}: {count} rows (Σ={total_cat:.0f})")
+
+    # Detail breakdown per bulan dan kategori
+    if st.checkbox("Show detailed breakdown"):
+        st.write("**Monthly breakdown by category:**")
+        monthly_detail = df_year.groupby(["bulan", "Kategori"])["nilai"].agg(["count", "sum"]).reset_index()
+        st.dataframe(monthly_detail)
+
+    # Cek duplikasi dengan informasi lebih detail
+    duplicates = long_df.duplicated(subset=['Nama', 'Kategori', 'bulan', 'minggu', 'Tahun'])
+    if duplicates.sum() > 0:
+        st.warning(f"⚠️ Found {duplicates.sum()} duplicate rows!")
+        # Tampilkan baris duplikat
+        dup_rows = long_df[duplicates]
+        st.write("**Duplicate rows found:**")
+        st.dataframe(dup_rows[['Nama', 'Kategori', 'bulan', 'minggu', 'nilai']])
+        
+        # Tampilkan summary duplikasi per bulan/kategori
+        dup_summary = dup_rows.groupby(['bulan', 'Kategori']).agg({
+            'nilai': ['count', 'sum'],
+            'Nama': 'nunique'
+        }).round(0)
+        st.write("**Duplication summary by month/category:**")
+        st.dataframe(dup_summary)
+    else:
+        st.success("✅ No duplicate rows found")
+        
+    # Tambahan: Cek apakah ada anomali dalam data
+    if not df_year.empty:
+        # Deteksi nilai yang sangat tinggi (outliers)
+        q95 = df_year["nilai"].quantile(0.95)
+        outliers = df_year[df_year["nilai"] > q95 * 3]  # 3x dari percentile ke-95
+        if not outliers.empty:
+            st.warning(f"⚠️ Found {len(outliers)} potential outliers (nilai > {q95*3:.0f})")
+            st.dataframe(outliers[['Nama', 'Kategori', 'bulan', 'minggu', 'nilai']])
             
-        </div>
-    </div>
-</div>
+        # Deteksi jika ada bulan dengan total nilai yang sangat berbeda
+        monthly_totals = df_year.groupby('bulan')['nilai'].sum()
+        if len(monthly_totals) > 1:
+            mean_monthly = monthly_totals.mean()
+            std_monthly = monthly_totals.std()
+            if std_monthly > 0:
+                anomaly_months = monthly_totals[abs(monthly_totals - mean_monthly) > 2 * std_monthly]
+                if not anomaly_months.empty:
+                    st.warning(f"⚠️ Months with unusual totals:")
+                    for month, total in anomaly_months.items():
+                        st.write(f"- {month}: {total:.0f} (avg: {mean_monthly:.0f})")
 
 
-    <!-- Modal Hapus -->
-    <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="modalHapusLabel">
-                        <i class="fas fa-exclamation-triangle me-2"></i> Konfirmasi Hapus
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Yakin ingin menghapus data <strong id="hapusNama"></strong>?</p>
-                    <input type="hidden" id="hapusId">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="btnKonfirmasiHapus">
-                        <i class="fas fa-trash-alt me-1"></i> Ya, Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- JS Libraries -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://markcell.github.io/jquery-tabledit/assets/js/tabledit.min.js"></script>
+# ========================= SIDEBAR =========================
+st.sidebar.header("Kontrol")
+uploaded = st.sidebar.file_uploader("Upload file Excel (.xlsx / .xls)", type=["xlsx", "xls"])
+manual_year = st.sidebar.number_input(
+    "Tahun (jika file tidak punya kolom Tahun)", min_value=2000, max_value=2100,
+    value=datetime.now().year, step=1
+)
+period_selected = st.sidebar.radio("Periode", options=["Bulanan", "Tahunan"], index=0)
+cats_selected = st.sidebar.multiselect("Filter Kategori", options=CATS, default=CATS)
+show_tables = st.sidebar.checkbox("Tampilkan tabel data ringkas", value=True)
+show_debug = st.sidebar.checkbox("Tampilkan debug info", value=True)
 
-    <script>
-        $(document).ready(function () {
-            let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
+if not uploaded:
+    st.info("Silakan upload file Excel asli (format 2 baris header).")
+    st.stop()
 
-            // Klik tombol hapus
-            $(document).on('click', '.btnHapus', function () {
-                const id = $(this).data('id');
-                const nama = $(this).data('nama');
+# ========================= LOAD & PARSE ====================
+try:
+    df_raw = try_read_excel(uploaded)
+except Exception as e:
+    st.error(f"Gagal membaca Excel: {e}")
+    st.stop()
 
-                $('#hapusId').val(id);
-                $('#hapusNama').text(nama);
+try:
+    long_df, target_df = build_long_and_target_from_multidx(df_raw)
+except Exception as e:
+    st.error(f"Format tidak dikenali: {e}")
+    st.stop()
 
-                modalHapus.show();
-            });
+# Isi Tahun jika kosong
+if "Tahun" not in long_df.columns or long_df["Tahun"].isna().all():
+    long_df["Tahun"] = int(manual_year)
+if "Tahun" not in target_df.columns or target_df["Tahun"].isna().all():
+    target_df["Tahun"] = int(manual_year)
+long_df["Tahun"] = long_df["Tahun"].astype(int)
+target_df["Tahun"] = target_df["Tahun"].astype(int)
 
-            // Konfirmasi hapus
-            $('#btnKonfirmasiHapus').on('click', function () {
-                const id = $('#hapusId').val();
+# Filter kategori
+if cats_selected:
+    long_df = long_df[long_df["Kategori"].isin(cats_selected)]
+    target_df = target_df[target_df["Kategori"].isin(cats_selected)].copy()
 
-                $.ajax({
-                    url: '{{ route("excel.delete") }}',
-                    method: 'POST',
-                    data: {
-                        ID: id,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            showMessage(response.message, 'success');
-                            modalHapus.hide();
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            showMessage(response.message, 'error');
-                        }
-                    },
-                    error: function () {
-                        showMessage('Gagal menghapus data', 'error');
-                    }
-                });
-            });
+# Filter Tahun
+st.sidebar.markdown("---")
+all_years = sorted(long_df["Tahun"].unique().tolist())
+year_selected = st.sidebar.selectbox("Pilih Tahun", options=all_years, index=max(0, len(all_years) - 1))
+df_year = long_df[long_df["Tahun"] == year_selected].copy()
+df_year_target = target_df[target_df["Tahun"] == year_selected].copy()
 
-            // Setup CSRF token
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+# Dropdown bulan
+months_in_year = ID_MONTHS
+month_selected = st.sidebar.selectbox(
+    "Pilih Bulan (untuk grafik Per Orang & Mingguan)", options=months_in_year, index=0
+)
 
-            // Function pesan alert
-            function showMessage(message, type) {
-                var alertClass = type === 'success' ? 'alert-success' : 'alert-error';
-                $('#message').html('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>');
+# Filter Nama
+all_names = sorted(df_year["Nama"].dropna().unique().tolist())
+names_selected = st.sidebar.multiselect("Filter Nama (kosong = semua)", options=all_names, default=all_names)
+if names_selected and len(names_selected) > 0:
+    df_year = df_year[df_year["Nama"].isin(names_selected)]
+    df_year_target = df_year_target[df_year_target["Nama"].isin(names_selected)].copy()
 
-                setTimeout(function () {
-                    $('.alert').alert('close');
-                }, 5000);
-            }
+# Debug info (opsional)
+if show_debug:
+    debug_data_info(df_raw, long_df, target_df, df_year)
 
-            // DataTable init
-            if ($('#excelTable').length) {
-                var table = $('#excelTable').DataTable({
-                    pageLength: 25,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    order: [[0, "asc"]],
-                    language: {
-                        search: "Pencarian:",
-                        lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                        paginate: {
-                            first: "Pertama",
-                            last: "Terakhir",
-                            next: "Selanjutnya",
-                            previous: "Sebelumnya"
-                        }
-                    }
-                });
+# ========================= METRICS =========================
+c1, c2, c3 = st.columns(3)
+with c1:
+    # Total hanya dari minggu 1-4 (sudah tidak ada nilai 0 di data)
+    total_w14 = df_year[
+        df_year["minggu"].isin(["minggu 1", "minggu 2", "minggu 3", "minggu 4"])
+    ]["nilai"].sum()
+    st.metric("Total KPI (Minggu 1-4)", f"{total_w14:,.0f}")
 
-                // Tambah tombol "Tambah Data"
-                $('.dataTables_filter').append(
-                    '<button id="btnTambah" type="button">' +
-                    '<i class="fas fa-plus me-2"></i>' +
-                    'Tambah Data' +
-                    '</button>'
-                );
-            }
+with c2:
+    st.metric("Jumlah Orang (aktif)", f"{df_year['Nama'].nunique():,}")
 
-            // Buka modal tambah
-            function openModal() {
-                let lastNo = 0;
-                $('#excelTable tbody tr').each(function () {
-                    let noVal = parseInt($(this).find('td').eq(1).text());
-                    if (!isNaN(noVal) && noVal > lastNo) {
-                        lastNo = noVal;
-                    }
-                });
-                $('#noField').val(lastNo + 1);
+with c3:
+    st.metric("Bulan Terisi", f"{df_year['bulan'].dropna().nunique():,}")
 
-                const modal = new bootstrap.Modal(document.getElementById('tambahModal'));
-                modal.show();
-            }
+# ========================= CHARTS ==========================
+# 1) Total per Bulan Jan–Des • 3 kategori
+st.subheader("1) Total per Bulan (Jan–Des) • 3 kategori (SKA / NON SKA / NA)")
+month_sum = month_total_by_category_complete(df_year)
+fig1 = px.bar(
+    month_sum, x="bulan", y="nilai", color="Kategori", barmode="stack",
+    category_orders={"bulan": ID_MONTHS, "Kategori": CATS},
+    title=f"Total per Bulan (Tahun {year_selected})"
+)
+st.plotly_chart(fig1, use_container_width=True)
 
-            $(document).on('click', '#btnTambah', function () {
-                openModal();
-            });
+# 2) Grafik Batang • Total per Orang
+st.subheader("2) Grafik Batang • Total per Orang")
+person_sum = person_total(df_year, month_selected, period=period_selected)
+fig2 = px.bar(
+    person_sum, x="Nama", y="nilai", color="Kategori",
+    category_orders={"Kategori": CATS},
+    title=(f"Total per Orang – Bulan {month_selected.capitalize()} (Tahun {year_selected})"
+           if period_selected == "Bulanan" else f"Total per Orang – Tahunan (Tahun {year_selected})")
+)
+fig2.update_xaxes(tickangle=45)
+st.plotly_chart(fig2, use_container_width=True)
 
-            // Submit form tambah
-            $('#formTambah').on('submit', function (e) {
-                e.preventDefault();
+# 3) Rekap Nilai per Minggu • per Kategori
+st.subheader("3) Rekap Nilai per Minggu • per Kategori")
+week_sum = weekly_sum_by_category_complete(df_year, month_selected, period=period_selected)
+fig3 = px.bar(
+    week_sum, x="minggu", y="nilai", color="Kategori", barmode="group",
+    category_orders={"Kategori": CATS},
+    title=(f"Nilai per Minggu • Bulan {month_selected.capitalize()} (Tahun {year_selected})"
+           if period_selected == "Bulanan" else f"Nilai per Minggu • Tahunan (Tahun {year_selected})")
+)
+st.plotly_chart(fig3, use_container_width=True)
 
-                let formData = $(this).serialize();
+# 4) Persentase Capaian Tahunan
+st.subheader("4) Persentase Capaian Tahunan (semua nama)")
+yearly_pct_df = yearly_percentage_by_name(df_year, df_year_target)
+if not yearly_pct_df.empty:
+    fig5 = px.bar(
+        yearly_pct_df.sort_values("Persentase", ascending=False),
+        x="Nama", y="Persentase",
+        title=f"Persentase Capaian Target (%) – Tahun {year_selected}",
+        text="Persentase"
+    )
+    fig5.update_traces(texttemplate="%{text:.1f}%", textposition="outside", cliponaxis=False)
+    fig5.update_yaxes(range=[0, max(100, float(yearly_pct_df["Persentase"].max()) * 1.1)])
+    fig5.update_xaxes(tickangle=45)
+    st.plotly_chart(fig5, use_container_width=True)
+else:
+    st.info("Tidak ada data persentase untuk ditampilkan.")
 
-                $.ajax({
-                    url: '{{ route("excel.store") }}',
-                    method: 'POST',
-                    data: formData,
-                    success: function (data) {
-                        if (data.success) {
-                            showMessage('Data berhasil ditambahkan!', 'success');
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('tambahModal'));
-                            if (modal) modal.hide();
-                            $('#formTambah')[0].reset();
-                            setTimeout(function () {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            showMessage('Gagal menambahkan data', 'error');
-                        }
-                    }
-                });
-            });
+# 5) Total KPI per Tahun
+st.subheader("5) Total per Tahun (hanya Minggu 1–4)")
+year_sum = (
+    long_df[long_df["minggu"].isin(["minggu 1", "minggu 2", "minggu 3", "minggu 4"])]
+    .groupby("Tahun", as_index=False)["nilai"].sum().sort_values("Tahun")
+)
+fig4 = px.bar(year_sum, x="Tahun", y="nilai", title="Total KPI per Tahun (Sum Minggu 1–4)")
+st.plotly_chart(fig4, use_container_width=True)
 
-            // Tabledit inline edit
-           // Init Tabledit
-$('#excelTable').Tabledit({
-    url: '{{ route("excel.update") }}',
-    method: 'POST',
-    editButton: false,
-    deleteButton: false,
-    saveButton: false,
-    restoreButton: false,
-    buttons: {}, // disable bawaan
-    columns: {
-        identifier: [0, "ID"],
-        editable: [
-            @foreach($header as $i => $col)
-                @if($i > 0)
-                    [{{ $i }}, "{{ addslashes($col) }}"],
-                @endif
-            @endforeach
-        ]
-    },
-    onSuccess: function (data, textStatus, jqXHR) {
-        if (data.success) {
-            showMessage(data.message ?? 'Data berhasil diperbarui!', 'success');
-        } else {
-            showMessage(data.message ?? 'Update gagal!', 'error');
-        }
-    },
-    onFail: function (jqXHR, textStatus, errorThrown) {
-        showMessage('Gagal update data: ' + errorThrown, 'error');
-    }
-});
+# ========================= TABLES (opsional) ================
+if show_tables:
+    st.markdown("### 🔎 Data Ringkas")
+    t1, t2, t3, t4 = st.tabs([
+        "Total Bulanan x Kategori",
+        "Per Orang (Bulan/Tahun)",
+        "Mingguan x Kategori (Bulan/Tahun)",
+        "Evaluasi Target (Bulan)"
+    ])
+    with t1:
+        st.dataframe(month_sum, use_container_width=True)
+    with t2:
+        st.dataframe(person_sum, use_container_width=True)
+    with t3:
+        st.dataframe(week_sum, use_container_width=True)
 
+# ========================= EVALUASI TARGET ==================
+df_eval = eval_target(df_year, df_year_target)
+if show_tables:
+    with t4:
+        st.dataframe(df_eval, use_container_width=True)
 
-// Custom tombol Edit (toggle jadi Save)
-$(document).on("click", ".btnEdit", function () {
-    let id = $(this).data("id");
-    let $row = $("#excelTable").find("tr").filter(function () {
-        return $(this).find("td:first").text() == id;
-    });
-
-    // Kalau belum edit → masuk mode edit
-    if (!$row.hasClass("editing")) {
-        $row.find(".tabledit-edit-button").trigger("click");
-        $row.addClass("editing");
-        $(this).html('<i class="fas fa-save"></i>'); // ganti ikon jadi save
-        $(this).removeClass("btn-primary").addClass("btn-success");
-    } 
-    // Kalau sudah edit → simpan
-    else {
-        $row.find(".tabledit-save-button").trigger("click");
-        $row.removeClass("editing");
-        $(this).html('<i class="fas fa-edit"></i>'); // balik lagi ke edit
-        $(this).removeClass("btn-success").addClass("btn-primary");
-    }
-});
-
-
-            // Reset form saat modal ditutup
-            document.getElementById('tambahModal').addEventListener('hidden.bs.modal', function () {
-                $('#formTambah')[0].reset();
-            });
-        });
-    </script>
-
-</body>
-</html>
+# ========================= DOWNLOAD ========================
+st.markdown("---")
+st.subheader("📥 Unduh Rekap Excel (sheet + chart)")
+excel_bytes = to_excel_bytes(
+    df_raw, df_year, month_sum, week_sum, person_sum, year_sum,
+    df_year_target, df_eval, yearly_pct_df
+)
+st.download_button(
+    label="💾 Download Rekap KPI.xlsx",
+    data=excel_bytes,
+    file_name=f"Rekap_KPI_{year_selected}.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+)
