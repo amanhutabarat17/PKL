@@ -21,24 +21,14 @@
         }
     </script>
     <style>
-{
-         --bpjs-bg-light-1: #f0fdf4;
-            --bpjs-bg-light-2: #d1fae5;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, var(--bpjs-bg-light-1), var(--bpjs-bg-light-2));
+            background: linear-gradient(to bottom, var(--bpjs-bg-green-1), var(--bpjs-bg-light-2));
         }
     </style>
 </head>
 
 <body>
-    <!--
-    Ini adalah komponen navigasi yang telah ditingkatkan.
-    Menggunakan Tailwind CSS untuk styling yang responsif dan modern.
-    Menu dropdown akan tersembunyi secara default dan hanya akan muncul saat tombol "Menu" diklik.
-    -->
     <nav class="w-full bg-gradient-to-r from-sky-500 via-green-500 to-green-600 shadow-2xl shadow-green-600/50 z-50">
         <div class="flex justify-between items-center h-20 px-8 lg:px-12">
             <!-- Logo dan Tautan Navigasi Utama -->
@@ -50,23 +40,26 @@
 
                 <!-- Tautan Beranda, BPJS Ketenagakerjaan dan Penugasan dengan styling baru -->
                 <div class="flex gap-4">
-                     <!-- Tautan BPJS Ketenagakerjaan -->
                     <a href="{{ route('bpjs.ketenagakerjaan') }}"
-                        class="text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 hover:bg-white hover:text-green-600 shadow-xl hover:shadow-green-500/50">
-                        BPJS Ketenagakerjaan
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        <span class="group-hover:text-green-600 transition-colors duration-150">BPJS
+                            Ketenagakerjaan</span>
                     </a>
+
 
                     <!-- Tautan Beranda -->
                     <a href="{{ route('dashboard') }}"
-                        class="text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 hover:bg-white hover:text-green-600 shadow-xl hover:shadow-green-500/50">
-                        Beranda
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
                     </a>
-                    
+
+
                     <!-- Tautan Penugasan -->
                     <a href="{{ route('penugasan.index') }}"
-                        class="text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 hover:bg-white hover:text-green-600 shadow-xl hover:shadow-green-500/50">
-                        Penugasan
+                       class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
                     </a>
+
                 </div>
             </div>
 
@@ -93,13 +86,10 @@
 
                 <!-- Konten Dropdown Menu -->
                 <!-- x-show="open" memastikan menu hanya tampil jika 'open' adalah true -->
-                <div x-show="open" @click.away="open = false"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 scale-90"
-                    x-transition:enter-end="opacity-100 scale-100"
+                <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
                     x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 scale-100"
-                    x-transition:leave-end="opacity-0 scale-90"
+                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90"
                     class="absolute right-0 top-16 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-2">
                     <!-- Tautan Profil -->
                     <a href="{{ route('profile.edit') }}"
@@ -140,4 +130,5 @@
         </div>
     </nav>
 </body>
+
 </html>
