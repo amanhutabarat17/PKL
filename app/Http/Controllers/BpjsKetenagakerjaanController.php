@@ -10,16 +10,33 @@ use Illuminate\Support\Facades\Storage;
 class BpjsKetenagakerjaanController extends Controller
 {
     /**
-     * Tampilkan halaman BPJS Ketenagakerjaan dengan foto-foto yang sudah diunggah.
+     * Tampilkan halaman admin.
      *
      * @return \Illuminate\View\View
      */
     public function index()
     {
-        // Ambil semua foto dari database untuk ditampilkan di galeri
+        // Pastikan hanya admin yang bisa mengakses halaman ini
+        if (Auth::user()->role !== 'admin') {
+            abort(403); // Akses ditolak
+        }
+
+        // Ambil semua foto dari database untuk ditampilkan di galeri admin
         $photos = Photo::orderBy('created_at', 'desc')->get(); // Mengambil foto terbaru lebih dulu
         
         return view('bpjs-ketenagakerjaan', compact('photos'));
+    }
+
+    /**
+     * Tampilkan halaman untuk pengguna (user).
+     *
+     * @return \Illuminate\View\View
+     */
+    public function showUserGallery()
+    {
+        // Ambil semua foto dari database untuk ditampilkan di galeri pengguna
+        $photos = Photo::orderBy('created_at', 'desc')->get();
+        return view('user.bpjs-ketenagakerjaan', compact('photos'));
     }
 
     /**

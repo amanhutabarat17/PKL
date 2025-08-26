@@ -384,8 +384,8 @@
                     order: [[0, "asc"]],
                     language: {
                         search: "Pencarian:",
-                        lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        lengthMenu: "Tampilkan MENU data per halaman",
+                        info: "Menampilkan START sampai END dari TOTAL data",
                         paginate: {
                             first: "Pertama",
                             last: "Terakhir",

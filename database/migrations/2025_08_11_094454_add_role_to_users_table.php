@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Gunakan Schema::table untuk memodifikasi tabel 'users'
         Schema::table('users', function (Blueprint $table) {
-              $table->string('role')->default('user')->after('email');
-            //
+            // Tambahkan kolom 'role' dengan tipe string
+            // Nilai default-nya adalah 'user'
+            // Letakkan kolom ini setelah kolom 'email'
+            $table->string('role')->default('user')->after('email');
         });
     }
 
@@ -22,8 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Ini adalah kebalikan dari fungsi 'up'
+        // Jika migrasi di-rollback, kolom 'role' akan dihapus
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn('role');
         });
     }
 };

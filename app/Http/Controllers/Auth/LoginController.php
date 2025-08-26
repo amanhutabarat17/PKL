@@ -34,12 +34,17 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Cek apakah user ada dan email-nya sudah terverifikasi
-        if ($user && $user->email_verified_at) {
-            if (Auth::attempt($credentials)) {
-                $request->session()->regenerate();
-                return redirect()->intended('bpjs-ketenagakerjaan');
+        // Cek apakah user ada dan kredensial cocok
+        if ($user && Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            // Cek role pengguna dan arahkan ke dashboard yang sesuai
+            if ($user->role === 'admin') {
+                return redirect()->intended('/bpjs-ketenagakerjaan');
             }
+
+            // Ini adalah baris yang diubah
+            return redirect()->intended(route('bpjs.ketenagakerjaan.user'));
         }
 
         return back()->withErrors([
