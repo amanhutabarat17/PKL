@@ -228,68 +228,74 @@ class DashboardController extends Controller
         }
     }
 
-    public function store(Request $request)
-    {
-        try {
-            $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
-            Log::info("Path Excel: " . $path);
+    public function store(Request $request) 
+{
+    try {
+        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+        Log::info("Path Excel: " . $path);
 
-            if (!file_exists($path)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'File Excel tidak ditemukan di: ' . $path
-                ]);
-            }
-
-            $spreadsheet = IOFactory::load($path);
-            $sheet = $spreadsheet->getActiveSheet();
-
-            // Cari baris terakhir dengan nomor di kolom A
-            $highestRow = $sheet->getHighestRow();
-            $lastRow = 1;
-            for ($row = $highestRow; $row >= 1; $row--) {
-                $val = $sheet->getCell('A' . $row)->getValue();
-                if (!empty($val) && is_numeric($val)) {
-                    $lastRow = $row;
-                    break;
-                }
-            }
-
-            $lastNo = (int) $sheet->getCell('A' . $lastRow)->getValue();
-            $newNo = $lastNo + 1;
-
-            $sheet->fromArray([
-                $newNo,
-                $request->Nama,
-                $request->KPJ,
-                $request->input('Jenis_Klaim'),
-                $request->input('Tanggal_Terima'),
-                $request->input('Tanggal_Rekam'),
-                $request->Status,
-                $request->input('Tanggal_Meninggal'),
-                $request->Keterangan,
-                $request->Alamat,
-                $request->Petugas,
-            ], null, 'A' . ($lastRow + 1));
-
-            $rowIndex = $lastRow + 1;
-
-            // Terapkan warna setelah insert
-            $this->applyRowColor($sheet, $rowIndex);
-
-            $writer = new Xlsx($spreadsheet);
-            $writer->save($path);
-
-            Log::info("Data berhasil disimpan!");
-            return response()->json(['success' => true, 'message' => 'Data berhasil disimpan!']);
-        } catch (\Exception $e) {
-            Log::error("Gagal Store: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
+        if (!file_exists($path)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
+                'message' => 'File Excel tidak ditemukan di: ' . $path
             ]);
         }
+
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Cari baris terakhir dengan data di kolom A
+        $highestRow = $sheet->getHighestRow();
+        $lastRow = 1;
+        for ($row = $highestRow; $row >= 1; $row--) {
+            $val = $sheet->getCell('A' . $row)->getValue();
+            if (!empty($val) && is_numeric($val)) {
+                $lastRow = $row;
+                break;
+            }
+        }
+
+        // Generate nomor baru secara otomatis
+        $lastNo = (int) $sheet->getCell('A' . $lastRow)->getValue();
+        $newNo = $lastNo + 1;
+
+        // Insert data ke row baru - PASTIKAN URUTAN SESUAI DENGAN KOLOM EXCEL
+        $newRowData = [
+            $newNo,  // Kolom A: Nomor otomatis
+            $request->input('Nama'),  // Kolom B: Nama dari form
+            $request->input('KPJ'),   // Kolom C: KPJ dari form
+            $request->input('Jenis_Klaim'),     // Kolom D
+            $request->input('Tanggal_Terima'),  // Kolom E
+            $request->input('Tanggal_Rekam'),   // Kolom F
+            $request->input('Status'),          // Kolom G
+            $request->input('Tanggal_Meninggal'), // Kolom H
+            $request->input('Keterangan'),      // Kolom I
+            $request->input('Alamat'),          // Kolom J
+            $request->input('Petugas'),         // Kolom K
+        ];
+
+        $newRowIndex = $lastRow + 1;
+        $sheet->fromArray($newRowData, null, 'A' . $newRowIndex);
+
+        // Terapkan warna setelah insert
+        $this->applyRowColor($sheet, $newRowIndex);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($path);
+
+        Log::info("Data berhasil disimpan! Nomor: " . $newNo . ", Nama: " . $request->input('Nama'));
+        return response()->json([
+            'success' => true, 
+            'message' => 'Data berhasil disimpan! Nomor: ' . $newNo
+        ]);
+    } catch (\Exception $e) {
+        Log::error("Gagal Store: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
     }
+}
 
     public function delete(Request $request)
     {
