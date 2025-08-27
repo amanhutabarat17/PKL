@@ -11,17 +11,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BpjsKetenagakerjaanController;
 
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
 
 // 🔹 Halaman Welcome (public)
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
-
+Route::get('/bpjs-ketenagakerjaan', [BpjsKetenagakerjaanController::class, 'index'])->name('bpjs.ketenagakerjaan');
 
 // 🔹 Grup rute untuk user yang BELUM login
 Route::middleware('guest')->group(function () {

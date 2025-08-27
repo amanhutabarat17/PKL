@@ -12,7 +12,7 @@
             --bpjs-end-color: #009944; /* Hijau terang */
         }
         {
-         --bpjs-bg-light-1: #f0fdf4;
+           --bpjs-bg-light-1: #f0fdf4;
             --bpjs-bg-light-2: #d1fae5;
         }
         body {
@@ -109,7 +109,9 @@
             </ul>
 
             <div class="mt-5 d-flex justify-content-between align-items-center">
-                <a href="{{ url('/bpjs-ketenagakerjaan') }}" class="btn btn-bpjs-green">
+                <!-- Logika dinamis untuk tombol kembali -->
+                <a href="{{ Auth::user()->role === 'admin' ? route('dashboard') : route('dashboarduser') }}"
+                   class="btn btn-bpjs-green">
                     <i class="fas fa-arrow-left me-2"></i> Kembali
                 </a>
                 <p class="text-end text-muted mb-0"><strong>Pengembang:</strong> Tim PKL BPJS Ketenagakerjaan Medan Kota</p>

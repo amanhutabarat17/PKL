@@ -28,7 +28,7 @@ class ProfileUpdateRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             // Aturan validasi untuk file avatar.
             // Memastikan file adalah gambar, tidak lebih dari 2MB, dan tipe file yang diizinkan.
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:20048'],
         ];
     }
 }
