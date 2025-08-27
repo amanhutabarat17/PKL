@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Auth;
 class PenugasanController extends Controller
 {
     /**
-     * Tampilkan daftar penugasan karyawan.
+     * Tampilkan daftar penugasan.
      */
     public function index()
     {
         $penugasans = Penugasan::with('kecamatan')->get();
+        // Menggunakan rute 'penugasanuser' yang telah kita definisikan
         return view('penugasan.index', compact('penugasans'));
     }
 
@@ -39,7 +40,6 @@ class PenugasanController extends Controller
             'alamat_lengkap' => 'required|string',
         ]);
 
-        // Perbaikan: Hanya simpan data yang valid
         Penugasan::create([
             'nama_karyawan' => $request->nama_karyawan,
             'kecamatan_id' => $request->kecamatan_id,
@@ -88,11 +88,9 @@ class PenugasanController extends Controller
     /**
      * Dapatkan daftar kecamatan berdasarkan kabupaten.
      */
-
-public function getKecamatan($kabupaten_id)
-{
-    $kecamatans = Kecamatan::where('kabupaten_id', $kabupaten_id)->get();
-
-    return response()->json($kecamatans);
-}
+    public function getKecamatan($kabupaten_id)
+    {
+        $kecamatans = Kecamatan::where('kabupaten_id', $kabupaten_id)->get();
+        return response()->json($kecamatans);
+    }
 }

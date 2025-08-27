@@ -55,7 +55,7 @@ class OtpVerificationController extends Controller
             // Login user secara otomatis setelah verifikasi berhasil
             auth()->login($user);
 
-            return redirect()->route('/user/bpjs-ketenagakerjaan')->with('status', 'Pendaftaran berhasil! Anda dapat masuk sekarang.');
+            return redirect()->route('/bpjs.ketenagakerjaanuser')->with('status', 'Pendaftaran berhasil! Anda dapat masuk sekarang.');
         }
 
         // Jika kode OTP tidak cocok

@@ -5,9 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Navigation Bar</title>
-    <!-- Tailwind CSS CDN untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js untuk fungsionalitas menu dropdown -->
     <script src="//unpkg.com/alpinejs" defer></script>
     <script>
         tailwind.config = {
@@ -16,9 +14,9 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
-                }
-            }
-        }
+                },
+            },
+        };
     </script>
     <style>
         body {
@@ -33,93 +31,97 @@
         <div class="flex justify-between items-center h-20 px-8 lg:px-12">
             <!-- Logo dan Tautan Navigasi Utama -->
             <div class="flex items-center gap-10">
-                <!-- Placeholder untuk logo -->
                 <h1 class="flex items-center">
                     <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
                 </h1>
 
-                <!-- Tautan Beranda, BPJS Ketenagakerjaan dan Penugasan dengan styling baru -->
+                <!-- Tautan Navigasi yang disesuaikan untuk Admin dan User -->
                 <div class="flex gap-4">
-                    <a href="{{ route('bpjs.ketenagakerjaan') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">BPJS
-                            Ketenagakerjaan</span>
-                    </a>
+                    {{-- Navigasi untuk Admin --}}
+                    @if(Auth::check() && Auth::user()->role === 'admin')
+                        <a href="{{ route('bpjs.ketenagakerjaan') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                        </a>
 
+                        <a href="{{ route('dashboard') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Dashboard</span>
+                        </a>
 
-                    <!-- Tautan Beranda -->
-                    <a href="{{ route('dashboard') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
-                    </a>
+                        <a href="{{ route('penugasan.index') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
+                        </a>
+                        <!-- Tambahkan tautan khusus admin lainnya di sini jika diperlukan -->
+                    {{-- Navigasi untuk User Biasa --}}
+                    @else
+                        <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                        </a>
 
+                        <a href="{{ route('dashboarduser') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Dashboard</span>
+                        </a>
 
-                    <!-- Tautan Penugasan -->
-                    <a href="{{ route('penugasan.index') }}"
-                       class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
-                    </a>
-
+                        <a href="{{ route('penugasanuser') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
+                        </a>
+                    @endif
                 </div>
             </div>
 
-            <!-- Bagian Profil Pengguna dan Dropdown Menu -->
-            <!-- x-data="{ open: false }" memastikan menu tersembunyi di awal -->
+            <!-- Bagian Profil Pengguna dan Dropdown Menu (sama untuk semua pengguna) -->
             <div x-data="{ open: false }" class="relative flex items-center gap-4">
-                <!-- Avatar Pengguna -->
                 <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-                    alt="Foto Profil" class="w-14 h-14 rounded-full border-4 border-white shadow-xl">
+                     alt="Foto Profil" class="w-14 h-14 rounded-full border-4 border-white shadow-xl">
                 <span class="text-white font-medium text-lg hidden md:block">{{ Auth::user()->name }}</span>
 
-                <!-- Tombol Menu Dropdown -->
-                <!-- @click="open = !open" akan menampilkan/menyembunyikan menu saat diklik -->
                 <button @click="open = !open"
-                    class="flex items-center gap-2 bg-white text-green-800 text-base font-semibold px-4 py-2 rounded-full shadow-lg shadow-green-500/50 hover:bg-gray-100 transition-all duration-200">
+                        class="flex items-center gap-2 bg-white text-green-800 text-base font-semibold px-4 py-2 rounded-full shadow-lg shadow-green-500/50 hover:bg-gray-100 transition-all duration-200">
                     <span>Menu</span>
                     <svg class="w-4 h-4 text-green-800 transition-transform duration-200"
-                        :class="open ? 'rotate-180' : 'rotate-0'" fill="currentColor" viewBox="0 0 20 20">
+                         :class="open ? 'rotate-180' : 'rotate-0'" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                            clip-rule="evenodd" />
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                              clip-rule="evenodd" />
                     </svg>
                 </button>
 
-                <!-- Konten Dropdown Menu -->
-                <!-- x-show="open" memastikan menu hanya tampil jika 'open' adalah true -->
                 <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90"
-                    class="absolute right-0 top-16 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-2">
-                    <!-- Tautan Profil -->
+                     x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90"
+                     class="absolute right-0 top-16 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-2">
                     <a href="{{ route('profile.edit') }}"
-                        class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 ease-in-out">
+                       class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 ease-in-out">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
+                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                         Profil
                     </a>
-                    <!-- Tautan Tentang -->
                     <a href="{{ route('tentang') }}"
-                        class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 ease-in-out">
+                       class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 ease-in-out">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
+                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Tentang
                     </a>
-                    <!-- Tombol Keluar -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="flex w-full items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition duration-150 ease-in-out">
+                                class="flex w-full items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition duration-150 ease-in-out">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
+                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                                 </path>
                             </svg>
                             Keluar

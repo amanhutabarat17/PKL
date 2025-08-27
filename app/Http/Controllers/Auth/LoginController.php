@@ -44,7 +44,7 @@ class LoginController extends Controller
             }
 
             // Ini adalah baris yang diubah
-            return redirect()->intended(route('bpjs.ketenagakerjaan.user'));
+            return redirect()->intended(route('bpjs.ketenagakerjaanuser'));
         }
 
         return back()->withErrors([

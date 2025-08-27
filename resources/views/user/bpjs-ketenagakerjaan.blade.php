@@ -44,14 +44,18 @@
                 </h1>
                 <!-- Tautan Navigasi yang kini selalu terlihat di layar besar (lg) -->
                 <div class="hidden lg:flex gap-6">
-                    <a href="{{ route('bpjs.ketenagakerjaan.user') }}"
+                    <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
                         class="text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:text-green-600 shadow-xl">
                         BPJS Ketenagakerjaan
                     </a>
                     <!-- Pastikan rute ini mengarah ke dashboard pengguna Anda -->
-                    <a href="{{ route('dashboard') }}"
+                    <a href="{{ route('dashboarduser') }}"
                         class="text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:text-green-600 shadow-xl">
                         Beranda
+                    </a>
+                    <a href="{{ route('penugasanuser') }}"
+                        class="text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:text-green-600 shadow-xl">
+                        Penugasan
                     </a>
                 </div>
             </div>
