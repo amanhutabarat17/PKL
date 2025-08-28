@@ -13,6 +13,54 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
     <style>
+        /* Mobile Responsive Table - Horizontal Scroll */
+        @media (max-width: 768px) {
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border: 1px solid #dee2e6;
+                border-radius: 0.375rem;
+                margin-bottom: 1rem;
+            }
+            
+            .table-container table {
+                min-width: 800px; /* Minimum width untuk memaksa scroll horizontal */
+                margin-bottom: 0;
+            }
+            
+            /* Wrapper DataTables responsive */
+            .dataTables_wrapper {
+                overflow-x: auto;
+                width: 100%;
+            }
+            
+            /* Pastikan filter dan pagination tetap terlihat */
+            .dataTables_filter,
+            .dataTables_length,
+            .dataTables_info,
+            .dataTables_paginate {
+                margin: 10px 0;
+            }
+            
+            /* Tombol aksi tetap terlihat dengan baik */
+            .d-flex.gap-1 {
+                white-space: nowrap;
+            }
+        }
+
+        /* Desktop - Normal behavior */
+        @media (min-width: 769px) {
+            .table-container {
+                width: 100%;
+                overflow: visible;
+            }
+            
+            .table-container table {
+                width: 100%;
+            }
+        }
+
         table.dataTable td {
             vertical-align: middle;
         }
@@ -44,6 +92,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         /* Custom button styling */
@@ -59,6 +108,33 @@
 
         #btnTambah:hover {
             background-color: #157347;
+        }
+
+        /* Legend styling untuk mobile */
+        .legend-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        @media (max-width: 768px) {
+            .dataTables_filter {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .legend-container {
+                margin-left: 0;
+                justify-content: center;
+                order: 2;
+            }
+            
+            .dataTables_filter input {
+                margin-left: 0 !important;
+            }
         }
 
         /* ================================
@@ -136,40 +212,42 @@
         @endif
 
         @if(!empty($header) && !empty($rows))
-            <table id="excelTable" class="display" style="width:100%">
-                <thead>
-                    <tr>
-                        @foreach($header as $head)
-                            <th>{{ $head }}</th>
-                        @endforeach
-                        <th style="text-align: center; vertical-align: middle;"> Aksi </th> <!-- Tambahan kolom aksi -->
-                    </tr>
-                </thead>
-              <tbody>
-    @foreach($rows as $i => $row)
-        @php
-            $rowColor = $rowColors[$i] ?? null;
-        @endphp
-        <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
-            @foreach($row as $cell)
-                <td>{{ $cell ?? '' }}</td>
-            @endforeach
-            <td>
-                <div class="d-flex gap-1">
-                    <button class="btn btn-sm btnHapus"
-                        data-id="{{ $row[0] }}"
-                        data-nama="{{ $row[1] }}"
-                        title="Hapus">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
-
-
-            </table>
+        <div class="table-container">
+           <table id="excelTable" class="display responsive nowrap" style="width:100%">
+        <thead>
+            <tr>
+                @foreach($header as $head)
+                    <th>{{ $head }}</th>
+                @endforeach
+                <th style="text-align: center; vertical-align: middle;"> Aksi </th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach($rows as $i => $row)
+            @php $rowColor = $rowColors[$i] ?? null; @endphp
+            <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
+                @foreach($row as $cell)
+                    <td>{{ $cell ?? '' }}</td>
+                @endforeach
+                <td>
+                    <div class="d-flex gap-1">
+                       <!-- <button class="btn btn-sm btn-primary btnEdit" data-id="{{ $row[0] }}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        -->
+                        <button class="btn btn-sm btnHapus"
+                            data-id="{{ $row[0] }}"
+                            data-nama="{{ $row[1] }}"
+                            title="Hapus">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+            </div>
     @else
     <div class="d-flex justify-content-between align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
         <div class="alert alert-info text-center flex-grow-1 mb-0">
@@ -235,9 +313,9 @@
                         <div class="col-md-6 mb-3">
                             <label for="status" class="form-label">Status</label>
                             <select class="form-control" id="status" name="Status">
-                                <option value="Diterima">Diterima</option>
+                                <option value="Diterima">Pending</option>
                                 <option value="Ditolak">Ditolak</option>
-                                <option value="Pending">Pending</option>
+                                <option value="Pending">Diterima</option>
                             </select>
                         </div>
 
@@ -382,6 +460,7 @@
                     pageLength: 25,
                     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
                     order: [[0, "asc"]],
+                    scrollX: true, // Enable horizontal scrolling
                     language: {
                         search: "Pencarian:",
                         lengthMenu: "Tampilkan _MENU_ data per halaman",
@@ -395,20 +474,21 @@
                     }
                 });
 
-                // Tambah tombol "Tambah Data"
-               $('.dataTables_filter').append(`
-    <div class="ms-3 d-flex align-items-center gap-2">
-        <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
-        <small>≤ 6 bulan</small>
-        <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
-        <small>> 6 bulan</small>
-        <button id="btnTambah" type="button" class="btn btn-success ms-auto">
-            <i class="fas fa-plus me-2"></i>
-            Tambah Data
-        </button>
-    </div>
-`);
-
+                // Tambah tombol "Tambah Data" dan legend
+                $('.dataTables_filter').append(`
+                    <div class="legend-container">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
+                            <small>≤ 6 bulan</small>
+                            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
+                            <small>> 6 bulan</small>
+                        </div>
+                        <button id="btnTambah" type="button" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>
+                            Tambah Data
+                        </button>
+                    </div>
+                `);
             }
 
             // Buka modal tambah
@@ -526,6 +606,5 @@ $(document).on("click", ".btnEdit", function () {
             });
         });
     </script>
-
 </body>
 </html>

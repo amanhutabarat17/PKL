@@ -297,7 +297,7 @@ class DashboardController extends Controller
     }
 }
 
-    public function delete(Request $request)
+   public function delete(Request $request)
     {
         try {
             $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
