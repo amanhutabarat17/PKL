@@ -9,6 +9,9 @@ use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BpjsKetenagakerjaanController;
+// Tambahkan use statement ini di bagian atas
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 
 
@@ -104,3 +107,25 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('welcome');
     })->name('keluar');
 });
+
+// KODE BARU DITAMBAHKAN DI SINI
+// Route ini akan menangani permintaan gambar dari storage
+Route::get('/storage/photos/{filename}', function ($filename) {
+    // Path file di dalam folder storage/app/public/
+    $path = 'photos/' . $filename;
+
+    // Cek apakah file ada
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    // Ambil file dari storage
+    $file = Storage::disk('public')->get($path);
+    $type = Storage::disk('public')->mimeType($path);
+
+    // Buat response untuk menampilkan file di browser
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+})->name('storage.image');

@@ -14,11 +14,15 @@ class Penugasan extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'nama_karyawan',
-        'alamat_lengkap',
-        'kecamatan_id',
-    ];
+  // app/Models/Penugasan.php
+
+protected $fillable = [
+    'nama_karyawan',
+    'kecamatan_id',
+    'alamat_lengkap',
+    'deskripsi',    // <-- TAMBAHKAN INI
+    'photo_path',   // <-- TAMBAHKAN INI JUGA
+];
 
     /**
      * Get the kecamatan that owns the penugasan.
