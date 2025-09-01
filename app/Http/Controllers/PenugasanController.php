@@ -56,8 +56,13 @@ class PenugasanController extends Controller
             'photo_path' => $path, // Simpan path foto ke kolom photo_path
         ]);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         
         return redirect()->route('penugasan.index')->with('success', 'Penugasan baru berhasil ditambahkan.');
+=======
+
+        return redirect()->route('penugasan.create')->with('success', 'Penugasan baru berhasil ditambahkan!');
+>>>>>>> Stashed changes
 =======
 
         return redirect()->route('penugasan.create')->with('success', 'Penugasan baru berhasil ditambahkan!');

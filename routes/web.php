@@ -10,9 +10,15 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BpjsKetenagakerjaanController;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // Tambahkan use statement ini di bagian atas
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
+=======
+use App\Http\Controllers\DashboardUserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+>>>>>>> Stashed changes
 =======
 use App\Http\Controllers\DashboardUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;

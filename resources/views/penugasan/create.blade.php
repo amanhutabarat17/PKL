@@ -158,6 +158,9 @@
     .modal-button:hover {
         background-color: #059669;
     }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 </style>
 <div class="form-container">
@@ -339,6 +342,9 @@
                         $('#kecamatan_id').empty();
                         $('#kecamatan_id').append('<option value="">-- Pilih Kecamatan --</option>');
                         
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                         if(Array.isArray(data) && data.length > 0) {
                             $.each(data, function(key, value) {
