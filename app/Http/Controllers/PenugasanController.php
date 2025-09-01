@@ -55,8 +55,13 @@ class PenugasanController extends Controller
             'alamat_lengkap' => $validatedData['alamat_lengkap'],
             'photo_path' => $path, // Simpan path foto ke kolom photo_path
         ]);
+<<<<<<< Updated upstream
         
         return redirect()->route('penugasan.index')->with('success', 'Penugasan baru berhasil ditambahkan.');
+=======
+
+        return redirect()->route('penugasan.create')->with('success', 'Penugasan baru berhasil ditambahkan!');
+>>>>>>> Stashed changes
     }
 
     /**

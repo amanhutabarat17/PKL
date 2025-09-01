@@ -1,140 +1,136 @@
 <!DOCTYPE html>
-<html lang="id" x-data="{ navOpen: false, profileOpen: false }">
+<html lang="id">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navbar Responsive</title>
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Alpine.js -->
-  <script src="//unpkg.com/alpinejs" defer></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Navigation Bar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, var(--bpjs-bg-green-1), var(--bpjs-bg-light-2));
         }
-      }
-    }
-  </script>
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-  </style>
+    </style>
 </head>
 
-<body class="bg-gray-50">
+<body>
+    <nav class="w-full bg-gradient-to-r from-sky-500 via-green-500 to-green-600 shadow-2xl shadow-green-600/50 z-50">
+        <div class="flex justify-between items-center h-20 px-8 lg:px-12">
+            <!-- Logo dan Tautan Navigasi Utama -->
+            <div class="flex items-center gap-10">
+                <h1 class="flex items-center">
+                    <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
+                </h1>
 
-  <!-- Navbar -->
-  <nav class="w-full bg-gradient-to-r from-sky-500 via-green-500 to-green-600 shadow-2xl z-50">
-    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-12">
+                <!-- Tautan Navigasi yang disesuaikan untuk Admin dan User -->
+                <div class="flex gap-4">
+                    {{-- Navigasi untuk Admin --}}
+                    @if(Auth::check() && Auth::user()->role === 'admin')
+                        <a href="{{ route('bpjs.ketenagakerjaan') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                        </a>
 
-      <!-- Desktop Navbar -->
-      <div class="hidden lg:flex justify-between items-center h-20">
-        <!-- Logo -->
-        <div class="flex items-center gap-10">
-          <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
-          <!-- Navigation Links -->
-          <div class="flex gap-4">
-            <a href="{{ route('bpjs.ketenagakerjaan') }}"
-              class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-              <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
-            </a>
-            <a href="{{ route('dashboard') }}"
-              class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-              <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
-            </a>
-            <a href="{{ route('penugasan.index') }}"
-              class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-              <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
-            </a>
-          </div>
-        </div>
+                        <a href="{{ route('dashboard') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Dashboard</span>
+                        </a>
 
-        <!-- Profile & Dropdown -->
-        <div x-data="{ profileOpen: false }" class="relative flex items-center gap-4">
-          <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-            alt="Foto Profil" class="w-14 h-14 rounded-full border-4 border-white shadow-xl hover:scale-105 transition">
-          <span class="text-white font-medium text-lg hidden md:block">{{ Auth::user()->name }}</span>
-          <button @click="profileOpen = !profileOpen"
-            class="flex items-center gap-2 bg-white text-green-800 text-base font-semibold px-4 py-2 rounded-full shadow-lg hover:bg-gray-100 transition">
-            <span>Menu</span>
-            <svg class="w-4 h-4 text-green-800 transition-transform duration-200"
-              :class="profileOpen ? 'rotate-180' : 'rotate-0'" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clip-rule="evenodd" />
-            </svg>
-          </button>
+                        <a href="{{ route('penugasan.index') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
+                        </a>
+                        <!-- Tambahkan tautan khusus admin lainnya di sini jika diperlukan -->
+                    {{-- Navigasi untuk User Biasa --}}
+                    @else
+                        <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                        </a>
 
-          <!-- Dropdown Menu -->
-          <div x-show="profileOpen" @click.away="profileOpen = false" x-transition
-            class="absolute right-0 top-16 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-2">
-            <a href="{{ route('profile.edit') }}"
-              class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Profil</a>
-            <a href="{{ route('tentang') }}"
-              class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Tentang</a>
-            <form method="POST" action="{{ route('logout') }}">
-              @csrf
-              <button type="submit"
-                class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded">Keluar</button>
-            </form>
-          </div>
-        </div>
-      </div>
+                        <a href="{{ route('dashboarduser') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Dashboard</span>
+                        </a>
 
-      <!-- Mobile Navbar -->
-      <div class="lg:hidden py-4" x-data="{ navOpen: false }">
-        <div class="flex justify-between items-center">
-          <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-32 h-auto drop-shadow-lg">
-          <button @click="navOpen = !navOpen" class="text-white focus:outline-none">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div x-show="navOpen" x-transition class="mt-4 space-y-2">
-          <a href="{{ route('bpjs.ketenagakerjaan') }}"
-            class="block text-white font-medium px-4 py-2 bg-green-700 rounded">BPJS Ketenagakerjaan</a>
-          <a href="{{ route('dashboard') }}"
-            class="block text-white font-medium px-4 py-2 bg-green-700 rounded">Beranda</a>
-          <a href="{{ route('penugasan.index') }}"
-            class="block text-white font-medium px-4 py-2 bg-green-700 rounded">Penugasan</a>
-
-          <!-- Mobile Profile -->
-          <div class="border-t border-white pt-2">
-            <div class="flex items-center gap-3 px-4">
-              <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-                alt="Foto Profil" class="w-10 h-10 rounded-full border-2 border-white shadow">
-              <span class="text-white font-medium">{{ Auth::user()->name }}</span>
+                        <a href="{{ route('penugasanuser') }}"
+                           class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                            <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
+                        </a>
+                    @endif
+                </div>
             </div>
-            <a href="{{ route('profile.edit') }}"
-              class="block px-4 py-2 text-white hover:bg-green-600 rounded">Profil</a>
-            <a href="{{ route('tentang') }}"
-              class="block px-4 py-2 text-white hover:bg-green-600 rounded">Tentang</a>
-            <form method="POST" action="{{ route('logout') }}">
-              @csrf
-              <button type="submit"
-                class="w-full text-left px-4 py-2 text-red-200 hover:bg-red-600 hover:text-white rounded">Keluar</button>
-            </form>
-          </div>
+
+            <!-- Bagian Profil Pengguna dan Dropdown Menu (sama untuk semua pengguna) -->
+            <div x-data="{ open: false }" class="relative flex items-center gap-4">
+                <img src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
+                     alt="Foto Profil" class="w-14 h-14 rounded-full border-4 border-white shadow-xl">
+                <span class="text-white font-medium text-lg hidden md:block">{{ Auth::user()->name }}</span>
+
+                <button @click="open = !open"
+                        class="flex items-center gap-2 bg-white text-green-800 text-base font-semibold px-4 py-2 rounded-full shadow-lg shadow-green-500/50 hover:bg-gray-100 transition-all duration-200">
+                    <span>Menu</span>
+                    <svg class="w-4 h-4 text-green-800 transition-transform duration-200"
+                         :class="open ? 'rotate-180' : 'rotate-0'" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                              clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90"
+                     class="absolute right-0 top-16 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-2">
+                    <a href="{{ route('profile.edit') }}"
+                       class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 ease-in-out">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Profil
+                    </a>
+                    <a href="{{ route('tentang') }}"
+                       class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 ease-in-out">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Tentang
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="flex w-full items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition duration-150 ease-in-out">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                                </path>
+                            </svg>
+                            Keluar
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
-
-    </div>
-  </nav>
-
+    </nav>
 </body>
 
 </html>

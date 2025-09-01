@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -11,9 +12,10 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        // Logika untuk mengambil data yang hanya dapat diakses oleh admin
-        $users = \App\Models\User::all(); // Contoh: Mengambil semua data user
+        // Mengambil semua data user, ini bisa disesuaikan
+        $users = User::all();
         
-        return view('dashboard', compact('users'));
+        // Mengarahkan ke view dashboard admin
+        return view('bpjs.ketenagakerjaan', compact('users'));
     }
 }

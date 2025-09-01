@@ -13,12 +13,13 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Menggunakan updateOrInsert untuk menghindari duplikasi jika seeder dijalankan lebih dari sekali
         DB::table('users')->updateOrInsert(
-            ['email' => 'admin123@gmail.com'], // cek berdasarkan email
+            ['email' => 'admin123@gmail.com'], // Kondisi untuk mencari baris yang sudah ada
             [
                 'name' => 'Admin Utama',
-                'password' => Hash::make('admin'), // password default
-                'role' => 'admin',
+                'password' => Hash::make('admin'), // Menggunakan Hash::make() untuk mengenkripsi password
+                'role' => 'admin', // Menetapkan peran 'admin'
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

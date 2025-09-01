@@ -1,39 +1,109 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atur Ulang Kata Sandi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Tambahkan meta tag untuk token CSRF agar token bisa diperbarui -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #f0fdf4, #d1fae5);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .form-container {
+            max-width: 450px;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-input:focus {
+            border-color: #009944;
+            box-shadow: 0 0 0 4px rgba(0, 153, 68, 0.2);
+        }
+        .btn-bpjs-green {
+            width: 100%;
+            background: linear-gradient(to right, #009944, #00643B);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 153, 68, 0.3);
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .btn-bpjs-green:hover {
+            background: linear-gradient(to right, #00643B, #009944);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 153, 68, 0.5);
+        }
+        .alert-error {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: left;
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Atur Ulang Kata Sandi</h2>
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+        @if ($errors->any())
+            <div class="alert-error">
+                <ul class="list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <form method="POST" action="{{ route('password.update') }}">
+            @csrf
+            
+            <!-- Input tersembunyi untuk email dan token -->
+            <input type="hidden" name="token" value="{{ $token }}">
+            <input type="hidden" name="email" value="{{ $email }}">
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Kata Sandi Baru</label>
+                <input id="password" type="password" name="password" required autocomplete="new-password" class="form-input">
+            </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <div class="mb-6">
+                <label for="password-confirm" class="block text-gray-700 text-sm font-bold mb-2">Konfirmasi Kata Sandi</label>
+                <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password" class="form-input">
+            </div>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+            <div class="flex items-center justify-between">
+                <button type="submit" class="btn-bpjs-green">
+                    Atur Ulang Kata Sandi
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
