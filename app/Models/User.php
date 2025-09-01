@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable; // Tambahkan HasApiTokens di sini
 
     /**
      * The attributes that are mass assignable.
@@ -21,10 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // TAMBAHKAN INI
+        'role',
         'otp_code',
         'otp_created_at',
-        'otp_verified',
+        'otp_verified', // Tetap dipertahankan
     ];
 
     /**
@@ -47,6 +48,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'otp_created_at' => 'datetime', // Tambahkan ini
         ];
     }
 }

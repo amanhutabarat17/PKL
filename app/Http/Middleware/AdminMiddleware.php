@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
@@ -16,12 +16,12 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Ganti dengan logika role admin Anda yang sebenarnya
+        // Periksa apakah pengguna sudah login dan memiliki peran 'admin'
         if (Auth::check() && Auth::user()->role === 'admin') {
             return $next($request);
         }
 
-        // Redirect atau abort jika tidak memiliki peran admin
-        return redirect()->route('bpjs-ketenagakerjaan'); // atau abort(403);
+        // Jika tidak, arahkan kembali ke dashboard pengguna biasa atau halaman login
+        return redirect('/bpjs.ketenagakerjaan')->with('error', 'Akses ditolak. Anda bukan admin.');
     }
 }

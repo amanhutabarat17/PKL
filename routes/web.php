@@ -9,14 +9,36 @@ use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BpjsKetenagakerjaanController;
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+// Tambahkan use statement ini di bagian atas
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+=======
+use App\Http\Controllers\DashboardUserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+>>>>>>> Stashed changes
+=======
+use App\Http\Controllers\DashboardUserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+>>>>>>> Stashed changes
 
-
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
 // 🔹 Halaman Welcome (public)
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
-Route::get('/bpjs-ketenagakerjaan', [BpjsKetenagakerjaanController::class, 'index'])->name('bpjs.ketenagakerjaan');
+
+// Rute ini tampaknya tidak terdefinisi dengan benar, saya akan meninggalkannya
+// dan menyarankan untuk mengecek kembali penggunaan dan tujuannya.
+Route::post('/bpjs.ketenagakerjaanuser', [OtpVerificationController::class, 'verify']);
 
 // 🔹 Grup rute untuk user yang BELUM login
 Route::middleware('guest')->group(function () {
@@ -24,12 +46,20 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterOtpController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterOtpController::class, 'register']);
 
+    // Rute untuk verifikasi OTP saat register
     Route::get('/otp-verification', [OtpVerificationController::class, 'showVerificationForm'])->name('verification.otp.form');
     Route::post('/otp-verification', [OtpVerificationController::class, 'verify'])->name('verification.otp.verify');
 
     // Login
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
+    // Rute untuk Lupa Kata Sandi berbasis tautan
+Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+Route::get('reset-password', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
 
@@ -69,7 +99,9 @@ Route::middleware('auth')->group(function () {
         // Grup rute dengan awalan 'user'
         Route::prefix('user')->group(function () {
             // Rute untuk dashboard user
-            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboarduser');
+        
+            Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard'); 
+            Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('dashboarduser');
 
             // Rute untuk daftar penugasan user
             Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasanuser');
@@ -107,3 +139,25 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('welcome');
     })->name('keluar');
 });
+
+// KODE BARU DITAMBAHKAN DI SINI
+// Route ini akan menangani permintaan gambar dari storage
+Route::get('/storage/photos/{filename}', function ($filename) {
+    // Path file di dalam folder storage/app/public/
+    $path = 'photos/' . $filename;
+
+    // Cek apakah file ada
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    // Ambil file dari storage
+    $file = Storage::disk('public')->get($path);
+    $type = Storage::disk('public')->mimeType($path);
+
+    // Buat response untuk menampilkan file di browser
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+})->name('storage.image');

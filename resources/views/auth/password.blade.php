@@ -26,7 +26,7 @@
             padding: 1.5rem;
         }
 
-        .form-container {
+        .container {
             max-width: 450px;
             width: 100%;
             background: linear-gradient(to bottom, #ffffff, var(--bpjs-bg-light-1));
@@ -36,11 +36,11 @@
             text-align: center;
         }
 
-        .header-form {
+        .header {
             color: var(--bpjs-text-color);
             margin-bottom: 2rem;
             font-weight: 700;
-            font-size: 2.25rem;
+            font-size: 2.25rem; /* text-4xl */
         }
 
         .form-group {
@@ -90,36 +90,6 @@
             box-shadow: 0 6px 15px rgba(0, 153, 68, 0.5);
         }
 
-        .btn-secondary {
-            width: 100%;
-            border: 2px solid var(--bpjs-light-green);
-            color: var(--bpjs-light-green);
-            background-color: transparent;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: background-color 0.3s, color 0.3s;
-            cursor: pointer;
-            text-align: center;
-            display: inline-block;
-            margin-top: 1rem;
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(0, 153, 68, 0.1);
-        }
-
-        .alert-status {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            text-align: left;
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
         .alert-error {
             padding: 1rem;
             border-radius: 0.5rem;
@@ -133,9 +103,11 @@
 </head>
 <body>
 
-<div class="form-container">
-    <h1 class="header-form">Lupa Kata Sandi</h1>
-    <p class="text-gray-600 mb-6">Masukkan email Anda untuk menerima kode OTP.</p>
+<div class="container">
+    <h1 class="header">Lupa Kata Sandi</h1>
+    <p class="mb-4 text-gray-600">
+        Masukkan alamat email Anda yang terdaftar, dan kami akan mengirimkan Anda kode OTP.
+    </p>
 
     @if (session('status'))
         <div class="alert-status">
@@ -143,26 +115,26 @@
         </div>
     @endif
     
+    @if ($errors->any())
+        <div class="alert-error">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
         <div class="form-group">
-            <label for="email" class="form-label">Alamat Email</label>
-            <input id="email" class="form-input" type="email" name="email" value="{{ old('email') }}" required autofocus />
-            @error('email')
-                <p class="alert-error mt-2">{{ $message }}</p>
-            @enderror
+            <label for="email" class="form-label">Email</label>
+            <input id="email" class="form-input" type="email" name="email" required autofocus />
         </div>
-
-        <div class="mt-6">
-            <button type="submit" class="btn-bpjs-green">
-                Kirim Kode OTP
-            </button>
-        </div>
+        <button type="submit" class="btn-bpjs-green">
+            Kirim OTP
+        </button>
     </form>
-    
-    <a href="{{ route('login') }}" class="btn-secondary">
-        Kembali ke Login
-    </a>
 </div>
 
 </body>

@@ -134,6 +134,9 @@
             text-decoration: underline;
             color: #4a5568;
             font-size: 0.875rem;
+            display: block;
+            text-align: right;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -142,12 +145,11 @@
 <div class="login-container">
     <h1 class="header-login">Masuk ke Akun Anda</h1>
 
-    <!-- Sesuaikan dengan logika framework Anda untuk menampilkan status sesi -->
-    <!-- Contoh: @if(session('status')) -->
-    <!-- <div class="alert-status">
+    @if(session('status'))
+    <div class="alert-status">
         {{ session('status') }}
-    </div> -->
-    <!-- @endif -->
+    </div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
@@ -156,19 +158,18 @@
         <div class="form-group">
             <label for="email" class="form-label">Email</label>
             <input id="email" class="form-input" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" />
-            <!-- Sesuaikan dengan logika framework Anda untuk menampilkan error -->
-            <!-- Contoh: @error('email')
+            @error('email')
                 <p class="alert-error mt-2">{{ $message }}</p>
-            @enderror -->
+            @enderror
         </div>
 
         <!-- Password -->
         <div class="form-group">
             <label for="password" class="form-label">Kata Sandi</label>
             <input id="password" class="form-input" type="password" name="password" required autocomplete="current-password" />
-            <!-- Contoh: @error('password')
+            @error('password')
                 <p class="alert-error mt-2">{{ $message }}</p>
-            @enderror -->
+            @enderror
         </div>
 
         <!-- Remember Me -->
@@ -177,12 +178,13 @@
             <span class="ms-2 text-sm text-gray-600">Ingat saya</span>
         </div>
 
-        <div class="flex items-center justify-between mt-6">
-            @if (Route::has('password.request'))
-                <a class="forgot-password-link" href="{{ route('password.request') }}">
-                    Lupa kata sandi Anda?
-                </a>
-            @endif
+        @if (Route::has('password.request'))
+            <a class="forgot-password-link" href="{{ route('password.request') }}">
+                Lupa kata sandi Anda?
+            </a>
+        @endif
+
+        <div class="flex items-center justify-end mt-6">
             <button type="submit" class="btn-bpjs-green px-6 py-2">
                 Masuk
             </button>

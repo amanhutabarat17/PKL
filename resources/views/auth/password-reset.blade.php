@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lupa Kata Sandi</title>
+    <title>Reset Kata Sandi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -134,32 +134,49 @@
 <body>
 
 <div class="form-container">
-    <h1 class="header-form">Lupa Kata Sandi</h1>
-    <p class="text-gray-600 mb-6">Masukkan email Anda untuk menerima kode OTP.</p>
-
-    @if (session('status'))
+    <h1 class="header-form">Ubah Kata Sandi</h1>
+    
+    @if(session('status'))
         <div class="alert-status">
             {{ session('status') }}
         </div>
     @endif
-    
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
-        <div class="form-group">
-            <label for="email" class="form-label">Alamat Email</label>
-            <input id="email" class="form-input" type="email" name="email" value="{{ old('email') }}" required autofocus />
-            @error('email')
-                <p class="alert-error mt-2">{{ $message }}</p>
-            @enderror
+    @if($errors->any())
+        <div class="alert-error">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
+    @endif
 
+    <form method="POST" action="{{ route('password.update') }}">
+        @csrf
+        <input type="hidden" name="email" value="{{ request()->email }}">
+        
+        <div class="form-group">
+            <label for="password" class="form-label">Kata Sandi Baru</label>
+            <input id="password" class="form-input" type="password" name="password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password_confirmation" class="form-label">Konfirmasi Kata Sandi</label>
+            <input id="password_confirmation" class="form-input" type="password" name="password_confirmation" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="otp_code" class="form-label">Kode OTP</label>
+            <input id="otp_code" class="form-input" type="text" name="otp_code" required>
+        </div>
+        
         <div class="mt-6">
             <button type="submit" class="btn-bpjs-green">
-                Kirim Kode OTP
+                Ubah Kata Sandi
             </button>
         </div>
     </form>
-    
+
     <a href="{{ route('login') }}" class="btn-secondary">
         Kembali ke Login
     </a>
