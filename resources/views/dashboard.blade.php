@@ -595,20 +595,7 @@
                 });
 
                 // Add "Tambah Data" button and legend
-                $('.dataTables_filter').append(`
-                    <div class="legend-container">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
-                            <small>≤ 6 bulan</small>
-                            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
-                            <small>> 6 bulan</small>
-                        </div>
-                        <button id="btnTambah" type="button" class="btn btn-success">
-                            <i class="fas fa-plus me-2"></i>
-                            Tambah Data
-                        </button>
-                    </div>
-                `);
+                $('.dataTables_filter').append( <div class="legend-container"> <div class="d-flex align-items-center gap-2"> <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span> <small>≤ 6 bulan</small> <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span> <small>> 6 bulan</small> </div> <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary"> <i class="fas fa-file-excel me-2"></i> Download Excel </button> <button id="btnTambah" type="button" class="btn btn-success"> <i class="fas fa-plus me-2"></i> Tambah Data </button> </div> );   
             }
 
 
