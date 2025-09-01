@@ -3,7 +3,7 @@
 
 @section('content')
 <style>
-<<<<<<< Updated upstream
+
     /* Style Anda tidak diubah */
     body { background-color: #1a202c; }
     .form-container { max-width: 42rem; margin-left: auto; margin-right: auto; padding: 2rem 1rem; }
@@ -17,7 +17,6 @@
     .submit-button:hover { background-color: #059669; transform: scale(1.05); }
     .cancel-link { color: #9ca3af; }
     .cancel-link:hover { color: #d1d5db; }
-=======
     /* Custom styles to match the provided image theme */
     body {
         background-color: #1a202c; /* Dark background to match the screenshot */
@@ -158,10 +157,7 @@
     .modal-button:hover {
         background-color: #059669;
     }
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 </style>
 <div class="form-container">
     <div class="form-card">
@@ -333,31 +329,27 @@
                     type: "GET",
                     dataType: "json",
                     success:function(data) {
-<<<<<<< Updated upstream
+
                         $('#kecamatan_id').empty().append('<option value="">-- Pilih Kecamatan --</option>');
-=======
+
                         // Cek data yang diterima dari server
                         console.log('Data dari server:', data);
                         
                         $('#kecamatan_id').empty();
                         $('#kecamatan_id').append('<option value="">-- Pilih Kecamatan --</option>');
                         
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
                         if(Array.isArray(data) && data.length > 0) {
                             $.each(data, function(key, value) {
                                 $('#kecamatan_id').append('<option value="'+ value.id +'">'+ value.nama_kecamatan +'</option>');
                             });
                         }
-<<<<<<< Updated upstream
-=======
+
                     },
                     error: function(xhr, status, error) {
                         console.error('AJAX Error:', status, error);
                         console.log('Response text:', xhr.responseText);
->>>>>>> Stashed changes
+
                     }
                 });
             } else {
