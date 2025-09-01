@@ -155,7 +155,9 @@
         <!-- Bidang Email -->
         <div class="form-group">
             <label for="email" class="form-label">Alamat Email</label>
-            <input type="email" id="email" name="email" required autocomplete="username"
+            <input type="email" id="email" name="email" required
+       pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+       class="form-input" required autocomplete="username"
                     class="form-input" value="{{ old('email') }}">
             @error('email')
                 <p class="alert-error">{{ $message }}</p>

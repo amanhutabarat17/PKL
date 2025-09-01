@@ -114,15 +114,22 @@
             </div>
         </main>
 
-        <script>
-            // Script tidak diubah
-        </script>
+      <script>
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#penugasanTable tbody tr");
+
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            if (text.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>
+
 
     </body>
-<<<<<<< HEAD
     </html>
-=======
-    </html>
-
-index
->>>>>>> ea205b1c01afb230bb34c06553f0aba5ca619c3f

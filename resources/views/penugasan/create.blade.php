@@ -5,7 +5,7 @@
 <style>
 
     /* Style Anda tidak diubah */
-    body { background-color: #1a202c; }
+   
     .form-container { max-width: 42rem; margin-left: auto; margin-right: auto; padding: 2rem 1rem; }
     .form-card { background-color: #f0fdf4; border: 1px solid #10b981; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25); padding: 2.5rem; transition: transform 0.3s ease-in-out; }
     .form-card:hover { transform: translateY(-5px); }
@@ -18,11 +18,12 @@
     .cancel-link { color: #9ca3af; }
     .cancel-link:hover { color: #d1d5db; }
     /* Custom styles to match the provided image theme */
-    body {
-        background-color: #1a202c; /* Dark background to match the screenshot */
-    }
+body {
+    background-color: white !important;
+}
 
     .form-container {
+        
         max-width: 42rem;
         margin-left: auto;
         margin-right: auto;
@@ -92,7 +93,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.75);
+        background-color: rgba(223, 216, 216, 0.75);
         display: none; /* Hidden by default */
         justify-content: center;
         align-items: center;
@@ -105,7 +106,7 @@
         background-color: #f0fdf4;
         padding: 2.5rem;
         border-radius: 1rem;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 20px rgba(215, 209, 209, 0.3);
         width: 90%;
         max-width: 400px;
         text-align: center;
