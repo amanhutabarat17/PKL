@@ -119,4 +119,10 @@
         </script>
 
     </body>
+<<<<<<< HEAD
     </html>
+=======
+    </html>
+
+index
+>>>>>>> ea205b1c01afb230bb34c06553f0aba5ca619c3f

@@ -293,7 +293,7 @@
                 var table = $('#excelTable').DataTable({
                     pageLength: 25,
                     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    order: [[1, "asc"]], // Ganti indeks order ke 1 (kolom Nama)
+                    order: [[0, "asc"]], // Ganti indeks order ke 1 (kolom Nama)
                     responsive: false, // Menonaktifkan fitur responsif
                     scrollX: false, // Menonaktifkan scroll horizontal
                     language: {
@@ -321,7 +321,7 @@
                 });
 
                 // Tambahkan kolom "No" di bagian depan header tabel
-                $('#excelTable thead tr').prepend('<th>No</th>');
+                $('#excelTable thead tr').prepend('<th></th>');
                 
                 // Tambahkan sel "No" kosong di bagian depan setiap baris data
                 $('#excelTable tbody tr').prepend('<td></td>');

@@ -14,7 +14,7 @@ class DashboardUserController extends Controller
      */
     public function index()
     {
-        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+        $path = storage_path('app/public/dataJKM.xlsx');
 
         // Pastikan file Excel ada
         if (!file_exists($path)) {
