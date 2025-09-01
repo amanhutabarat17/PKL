@@ -58,6 +58,9 @@ Route::middleware('auth')->group(function () {
         ->name('bpjs.ketenagakerjaan.destroy');
     // Halaman Tentang
     Route::get('/user/bpjs-ketenagakerjaan', [BpjsKetenagakerjaanController::class, 'showUserGallery'])->name('bpjs.ketenagakerjaanuser');
+//download excel
+    Route::get('/excel/download', [DashboardController::class, 'download'])->name('excel.download');
+
 
 
     // Rute untuk user yang sudah login dan terverifikasi

@@ -92,7 +92,7 @@
 @include('layouts.navigation')
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 80px);">
-    <div class="card w-100" style="max-width: 800px;">
+    <div class="card w-100" style="max-width: 800px;">~
         <div class="card-header text-center">
             <h2 class="fw-bold mb-0">Tentang Aplikasi Ini</h2>
         </div>

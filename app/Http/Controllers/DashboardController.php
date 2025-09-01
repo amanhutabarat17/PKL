@@ -17,6 +17,25 @@ class DashboardController extends Controller
     {
         return strtolower(trim(preg_replace('/[\s_]+/', '', $name)));
     }
+    /**
+     * Re-number ulang kolom A supaya selalu urut dari 1
+     */
+   private function renumberRows($sheet)
+{
+    $highestRow = $sheet->getHighestRow();
+    $number = 1;
+
+    for ($row = $this->startRow; $row <= $highestRow; $row++) {
+        $val = $sheet->getCell('B' . $row)->getValue(); // cek kolom Nama
+        if (!empty($val)) {
+            $sheet->setCellValue('A' . $row, $number);
+            $number++;
+        } else {
+            $sheet->setCellValue('A' . $row, ''); // kalau kosong, biarin kosong
+        }
+    }
+}
+
 
     /**
      * Helper: Terapkan warna baris sesuai selisih tanggal
@@ -67,7 +86,7 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+        $path = storage_path('app/public/dataJKM.xlsx');
 
         if (!file_exists($path)) {
             return view('dashboard', ['error' => 'File Excel tidak ditemukan.']);
@@ -124,7 +143,7 @@ class DashboardController extends Controller
     public function update(Request $request)
     {
         try {
-            $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+            $path = storage_path('app/public/dataJKM.xlsx');
             Log::info("Path Excel: " . $path);
 
             if (!file_exists($path)) {
@@ -215,7 +234,7 @@ class DashboardController extends Controller
                 'message' => 'Data berhasil diupdate',
                 'updated' => $updatedFields,
                 'rowColor' => $fillColor,
-                 'ID' => $id 
+                'ID' => $id
             ]);
 
 
@@ -228,10 +247,10 @@ class DashboardController extends Controller
         }
     }
 
-    public function store(Request $request) 
+   public function store(Request $request)
 {
     try {
-        $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
+        $path = storage_path('app/public/dataJKM.xlsx');
         Log::info("Path Excel: " . $path);
 
         if (!file_exists($path)) {
@@ -244,48 +263,51 @@ class DashboardController extends Controller
         $spreadsheet = IOFactory::load($path);
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Cari baris terakhir dengan data di kolom A
+        // Hitung jumlah data valid (cek kolom B = Nama)
         $highestRow = $sheet->getHighestRow();
-        $lastRow = 1;
-        for ($row = $highestRow; $row >= 1; $row--) {
-            $val = $sheet->getCell('A' . $row)->getValue();
-            if (!empty($val) && is_numeric($val)) {
-                $lastRow = $row;
-                break;
+        $dataCount = 0;
+        for ($row = $this->startRow; $row <= $highestRow; $row++) {
+            $val = $sheet->getCell('B' . $row)->getValue();
+            if (!empty($val)) {
+                $dataCount++;
             }
         }
 
-        // Generate nomor baru secara otomatis
-        $lastNo = (int) $sheet->getCell('A' . $lastRow)->getValue();
-        $newNo = $lastNo + 1;
+        // Nomor baru = jumlah data + 1
+        $newNo = $dataCount + 1;
 
-        // Insert data ke row baru - PASTIKAN URUTAN SESUAI DENGAN KOLOM EXCEL
+        // Baris baru = baris terakhir + 1
+        $newRowIndex = $highestRow + 1;
+
+        // Insert data ke row baru - urut sesuai kolom di Excel
         $newRowData = [
-            $newNo,  // Kolom A: Nomor otomatis
-            $request->input('Nama'),  // Kolom B: Nama dari form
-            $request->input('KPJ'),   // Kolom C: KPJ dari form
-            $request->input('Jenis_Klaim'),     // Kolom D
-            $request->input('Tanggal_Terima'),  // Kolom E
-            $request->input('Tanggal_Rekam'),   // Kolom F
-            $request->input('Status'),          // Kolom G
-            $request->input('Tanggal_Meninggal'), // Kolom H
-            $request->input('Keterangan'),      // Kolom I
-            $request->input('Alamat'),          // Kolom J
-            $request->input('Petugas'),         // Kolom K
+            $newNo,                                // Kolom A: Nomor otomatis
+            $request->input('Nama'),               // Kolom B
+            $request->input('KPJ'),                // Kolom C
+            $request->input('Jenis_Klaim'),        // Kolom D
+            $request->input('Tanggal_Terima'),     // Kolom E
+            $request->input('Tanggal_Rekam'),      // Kolom F
+            $request->input('Status'),             // Kolom G
+            $request->input('Tanggal_Meninggal'),  // Kolom H
+            $request->input('Keterangan'),         // Kolom I
+            $request->input('Alamat'),             // Kolom J
+            $request->input('Petugas'),            // Kolom K
         ];
 
-        $newRowIndex = $lastRow + 1;
         $sheet->fromArray($newRowData, null, 'A' . $newRowIndex);
 
         // Terapkan warna setelah insert
         $this->applyRowColor($sheet, $newRowIndex);
+
+        // Renumber ulang supaya tetap rapih (antisipasi kalau ada baris kosong)
+        $this->renumberRows($sheet);
 
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
 
         Log::info("Data berhasil disimpan! Nomor: " . $newNo . ", Nama: " . $request->input('Nama'));
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Data berhasil disimpan! Nomor: ' . $newNo
         ]);
     } catch (\Exception $e) {
@@ -297,34 +319,72 @@ class DashboardController extends Controller
     }
 }
 
-   public function delete(Request $request)
-    {
-        try {
-            $path = storage_path('app/public/DataPenjualanKosmetik.xlsx');
-            if (!file_exists($path)) {
-                return response()->json(['success' => false, 'message' => 'File tidak ditemukan']);
-            }
 
-            $spreadsheet = IOFactory::load($path);
-            $sheet = $spreadsheet->getActiveSheet();
-
-            $id = (int) $request->input('ID');
-            $idMapping = session('idMapping', []);
-            $rowIndex = $idMapping[$id] ?? null;
-
-            if (!$rowIndex) {
-                return response()->json(['success' => false, 'message' => "ID $id tidak ditemukan"]);
-            }
-
-            $sheet->removeRow($rowIndex, 1);
-
-            $writer = new Xlsx($spreadsheet);
-            $writer->save($path);
-
-            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus', 'action' => 'delete']);
-        } catch (\Exception $e) {
-            Log::error("Error deleting row: " . $e->getMessage());
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    public function delete(Request $request)
+{
+    try {
+        $path = storage_path('app/public/dataJKM.xlsx');
+        if (!file_exists($path)) {
+            return response()->json(['success' => false, 'message' => 'File tidak ditemukan']);
         }
+
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $id = (int) $request->input('ID');
+        $idMapping = session('idMapping', []);
+        $rowIndex = $idMapping[$id] ?? null;
+
+        if (!$rowIndex) {
+            return response()->json(['success' => false, 'message' => "ID $id tidak ditemukan"]);
+        }
+
+        // Hapus baris sesuai ID
+        $sheet->removeRow($rowIndex, 1);
+
+        // Bersihkan baris kosong dari bawah ke atas (cek kolom B = Nama)
+        $highestRow = $sheet->getHighestRow();
+        for ($row = $highestRow; $row >= $this->startRow; $row--) {
+            $val = $sheet->getCell('B' . $row)->getValue();
+            if (empty($val)) {
+                $sheet->removeRow($row, 1);
+            } else {
+                break; // ketemu data terakhir, stop
+            }
+        }
+
+        // Renumber ulang kolom A supaya urut mulai dari 1
+        $this->renumberRows($sheet);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($path);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data berhasil dihapus',
+            'action' => 'delete'
+        ]);
+    } catch (\Exception $e) {
+        Log::error("Error deleting row: " . $e->getMessage());
+        return response()->json(['success' => false, 'message' => $e->getMessage()]);
     }
+}
+
+    public function download()
+{
+    $path = storage_path('app/public/dataJKM.xlsx');
+
+    if (!file_exists($path)) {
+        return redirect()->back()->with('error', 'File Excel tidak ditemukan.');
+    }
+
+    return response()->download($path, 'dataJKM.xlsx', [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        'Pragma' => 'no-cache',
+        'Expires' => '0',
+    ]);
+}
+
+
 }

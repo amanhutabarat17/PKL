@@ -23,18 +23,19 @@
                 border-radius: 0.375rem;
                 margin-bottom: 1rem;
             }
-            
+
             .table-container table {
-                min-width: 800px; /* Minimum width untuk memaksa scroll horizontal */
+                min-width: 800px;
+                /* Minimum width untuk memaksa scroll horizontal */
                 margin-bottom: 0;
             }
-            
+
             /* Wrapper DataTables responsive */
             .dataTables_wrapper {
                 overflow-x: auto;
                 width: 100%;
             }
-            
+
             /* Pastikan filter dan pagination tetap terlihat */
             .dataTables_filter,
             .dataTables_length,
@@ -42,7 +43,7 @@
             .dataTables_paginate {
                 margin: 10px 0;
             }
-            
+
             /* Tombol aksi tetap terlihat dengan baik */
             .d-flex.gap-1 {
                 white-space: nowrap;
@@ -55,7 +56,7 @@
                 width: 100%;
                 overflow: visible;
             }
-            
+
             .table-container table {
                 width: 100%;
             }
@@ -125,13 +126,13 @@
                 align-items: stretch;
                 gap: 10px;
             }
-            
+
             .legend-container {
                 margin-left: 0;
                 justify-content: center;
                 order: 2;
             }
-            
+
             .dataTables_filter input {
                 margin-left: 0 !important;
             }
@@ -145,7 +146,8 @@
         .d-flex.gap-1 {
             display: inline-flex !important;
             align-items: center;
-            gap: 4px; /* jarak kecil antar tombol */
+            gap: 4px;
+            /* jarak kecil antar tombol */
         }
 
         /* Seragamkan ukuran semua tombol aksi */
@@ -159,12 +161,15 @@
             display: inline-flex !important;
             align-items: center;
             justify-content: center;
-            width: 30px;      /* ukuran konsisten */
-            height: 30px;     /* ukuran konsisten */
+            width: 30px;
+            /* ukuran konsisten */
+            height: 30px;
+            /* ukuran konsisten */
             padding: 0;
             margin: 0;
             border-radius: 6px;
-            font-size: 14px;  /* ikon pas */
+            font-size: 14px;
+            /* ikon pas */
             line-height: 1;
             color: #fff !important;
             border: none !important;
@@ -212,155 +217,158 @@
         @endif
 
         @if(!empty($header) && !empty($rows))
-        <div class="table-container">
-           <table id="excelTable" class="display responsive nowrap" style="width:100%">
-        <thead>
-            <tr>
-                @foreach($header as $head)
-                    <th>{{ $head }}</th>
-                @endforeach
-                <th style="text-align: center; vertical-align: middle;"> Aksi </th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach($rows as $i => $row)
-            @php $rowColor = $rowColors[$i] ?? null; @endphp
-            <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
-                @foreach($row as $cell)
-                    <td>{{ $cell ?? '' }}</td>
-                @endforeach
-                <td>
-                    <div class="d-flex gap-1">
-                       <!-- <button class="btn btn-sm btn-primary btnEdit" data-id="{{ $row[0] }}" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        -->
-                        <button class="btn btn-sm btnHapus"
-                            data-id="{{ $row[0] }}"
-                            data-nama="{{ $row[1] }}"
-                            title="Hapus">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+            <div class="table-container">
+                <table id="excelTable" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            @foreach($header as $head)
+                                <th>{{ $head }}</th>
+                            @endforeach
+                            <th style="text-align: center; vertical-align: middle;"> Aksi </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($rows as $i => $row)
+                            @php $rowColor = $rowColors[$i] ?? null; @endphp
+                            <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
+                                @foreach($row as $cell)
+                                    <td>{{ $cell ?? '' }}</td>
+                                @endforeach
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <!-- <button class="btn btn-sm btn-primary btnEdit" data-id="{{ $row[0] }}" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        -->
+                                        <button class="btn btn-sm btnHapus" data-id="{{ $row[0] }}" data-nama="{{ $row[1] }}"
+                                            title="Hapus">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-    @else
-    <div class="d-flex justify-content-between align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
-        <div class="alert alert-info text-center flex-grow-1 mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-            Tidak ada data untuk ditampilkan.
-        </div>
-        <button id="btnTambah" type="button" class="btn btn-success ms-3">
-            <i class="fas fa-plus me-2"></i> Tambah Data
-        </button>
-    </div>
-@endif
+        @else
+            <div class="d-flex justify-content-between align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
+                <div class="alert alert-info text-center flex-grow-1 mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Tidak ada data untuk ditampilkan.
+                </div>
+                <button id="btnTambah" type="button" class="btn btn-success ms-3">
+                    <i class="fas fa-plus me-2"></i> Tambah Data
+                </button>
+            </div>
+        @endif
 
     </div>
 
     <!-- Modal Tambah -->
-<div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-             <!-- Header -->
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="tambahModalLabel">
-                    <i class="fas fa-plus-circle me-2"></i>
-                    Tambah Data
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+    <div class="modal fade" id="tambahModal" tabindex="-1" aria-labelledby="tambahModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Header -->
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="tambahModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Tambah Data
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
 
-            <!-- Body -->
-            <div class="modal-body">
-                <form id="formTambah">
-                    <div class="row">
-                       <!-- Nama -->
-                        <div class="col-md-6 mb-3">
-                            <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama" name="Nama" required>
+                <!-- Body -->
+                <div class="modal-body">
+                    <form id="formTambah">
+                        <div class="row">
+                            <!-- Nama -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nama" name="Nama" required>
+                            </div>
+
+                            <!-- KPJ -->
+                            <div class="col-md-6 mb-3">
+                                <label for="kpj" class="form-label">KPJ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="kpj" name="KPJ" required>
+                            </div>
+
+                            <!-- Jenis Klaim -->
+                            <div class="col-md-6 mb-3">
+                                <label for="jenisKlaim" class="form-label">Jenis Klaim <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="jenisKlaim" name="Jenis Klaim" required>
+                            </div>
+
+                            <!-- Tanggal Terima -->
+                            <div class="col-md-6 mb-3">
+                                <label for="tanggalTerima" class="form-label">Tanggal Terima <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima"
+                                    required>
+                            </div>
+
+                            <!-- Tanggal Rekam -->
+                            <div class="col-md-6 mb-3">
+                                <label for="tanggalRekam" class="form-label">Tanggal Rekam <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="tanggalRekam" name="Tanggal Rekam" required>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-control" id="status" name="Status">
+                                    <option value="Diterima">Pending</option>
+                                    <option value="Ditolak">Ditolak</option>
+                                    <option value="Pending">Diterima</option>
+                                </select>
+                            </div>
+
+                            <!-- Tanggal Meninggal -->
+                            <div class="col-md-6 mb-3">
+                                <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
+                                <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
+                            </div>
+
+                            <!-- Keterangan -->
+                            <div class="col-12 mb-3">
+                                <label for="keterangan" class="form-label">Keterangan</label>
+                                <input type="text" class="form-control" id="keterangan" name="Keterangan">
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="col-12 mb-3">
+                                <label for="alamat" class="form-label">Alamat</label>
+                                <textarea class="form-control" id="alamat" name="Alamat" rows="2"></textarea>
+                            </div>
+
+                            <!-- Petugas -->
+                            <div class="col-12 mb-3">
+                                <label for="petugas" class="form-label">Petugas</label>
+                                <input type="text" class="form-control" id="petugas" name="Petugas">
+                            </div>
+
                         </div>
+                    </form>
+                </div>
 
-                        <!-- KPJ -->
-                        <div class="col-md-6 mb-3">
-                            <label for="kpj" class="form-label">KPJ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="kpj" name="KPJ" required>
-                        </div>
-
-                        <!-- Jenis Klaim -->
-                        <div class="col-md-6 mb-3">
-                            <label for="jenisKlaim" class="form-label">Jenis Klaim <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="jenisKlaim" name="Jenis Klaim" required>
-                        </div>
-
-                        <!-- Tanggal Terima -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggalTerima" class="form-label">Tanggal Terima <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima" required>
-                        </div>
-
-                        <!-- Tanggal Rekam -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggalRekam" class="form-label">Tanggal Rekam <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="tanggalRekam" name="Tanggal Rekam" required>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-control" id="status" name="Status">
-                                <option value="Diterima">Pending</option>
-                                <option value="Ditolak">Ditolak</option>
-                                <option value="Pending">Diterima</option>
-                            </select>
-                        </div>
-
-                        <!-- Tanggal Meninggal -->
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
-                            <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
-                        </div>
-
-                        <!-- Keterangan -->
-                        <div class="col-12 mb-3">
-                            <label for="keterangan" class="form-label">Keterangan</label>
-                            <input type="text" class="form-control" id="keterangan" name="Keterangan">
-                        </div>
-
-                        <!-- Alamat -->
-                        <div class="col-12 mb-3">
-                            <label for="alamat" class="form-label">Alamat</label>
-                            <textarea class="form-control" id="alamat" name="Alamat" rows="2"></textarea>
-                        </div>
-
-                        <!-- Petugas -->
-                        <div class="col-12 mb-3">
-                            <label for="petugas" class="form-label">Petugas</label>
-                            <input type="text" class="form-control" id="petugas" name="Petugas">
-                        </div>
-
-                    </div>
-                </form>
-            </div>
-
-            <!-- Footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>
-                    Batal
-                </button>
-                <button type="submit" form="formTambah" class="btn btn-primary">
-                    <i class="fas fa-save me-1"></i>
-                    Simpan Data
-                </button>
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>
+                        Batal
+                    </button>
+                    <button type="submit" form="formTambah" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>
+                        Simpan Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <!-- Modal Hapus -->
@@ -440,6 +448,10 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
+            $(document).on('click', '#btnDownloadExcel', function () {
+                window.location.href = '{{ route("excel.download") }}';
+            });
+
 
             // Function pesan alert
             function showMessage(message, type) {
@@ -464,7 +476,7 @@
                     language: {
                         search: "Pencarian:",
                         lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ sampai _END_ dari TOTAL data",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                         paginate: {
                             first: "Pertama",
                             last: "Terakhir",
@@ -476,20 +488,24 @@
 
                 // Tambah tombol "Tambah Data" dan legend
                 $('.dataTables_filter').append(`
-                    <div class="legend-container">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
-                            <small>≤ 6 bulan</small>
-                            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
-                            <small>> 6 bulan</small>
-                        </div>
-                        <button id="btnTambah" type="button" class="btn btn-success">
-                            <i class="fas fa-plus me-2"></i>
-                            Tambah Data
-                        </button>
-                    </div>
-                `);
+    <div class="legend-container">
+        <div class="d-flex align-items-center gap-2">
+            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
+            <small>≤ 6 bulan</small>
+            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
+            <small>> 6 bulan</small>
+        </div>
+        <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary">
+            <i class="fas fa-file-excel me-2"></i> Download Excel
+        </button>
+        <button id="btnTambah" type="button" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i> Tambah Data
+        </button>
+    </div>
+`);
+
             }
+
 
             // Buka modal tambah
             function openModal() {
@@ -537,67 +553,67 @@
             });
 
             // Tabledit inline edit
-           // Init Tabledit
-$('#excelTable').Tabledit({
-    url: '{{ route("excel.update") }}',
-    method: 'POST',
-    editButton: false,
-    deleteButton: false,
-    saveButton: false,
-    restoreButton: false,
-    buttons: {}, // disable bawaan
-    columns: {
-        identifier: [0, "ID"],
-        editable: [
-            @foreach($header as $i => $col)
-                @if($i > 0)
-                    [{{ $i }}, "{{ addslashes($col) }}"],
-                @endif
-            @endforeach
+            // Init Tabledit
+            $('#excelTable').Tabledit({
+                url: '{{ route("excel.update") }}',
+                method: 'POST',
+                editButton: false,
+                deleteButton: false,
+                saveButton: false,
+                restoreButton: false,
+                buttons: {}, // disable bawaan
+                columns: {
+                    identifier: [0, "ID"],
+                    editable: [
+                        @foreach($header as $i => $col)
+                            @if($i > 0)
+                                [{{ $i }}, "{{ addslashes($col) }}"],
+                            @endif
+                        @endforeach
         ]
-    },
-    onSuccess: function (data, textStatus, jqXHR) {
-        if (data.success) {
-            showMessage(data.message ?? 'Data berhasil diperbarui!', 'success');
-        if (data.rowColor) {
-                    let row = $("#excelTable tbody tr").filter(function() {
-                        return $(this).find("td:first").text() == data.ID;
-                    });
-                    row.css("background-color", "#" + data.rowColor);
+                },
+                onSuccess: function (data, textStatus, jqXHR) {
+                    if (data.success) {
+                        showMessage(data.message ?? 'Data berhasil diperbarui!', 'success');
+                        if (data.rowColor) {
+                            let row = $("#excelTable tbody tr").filter(function () {
+                                return $(this).find("td:first").text() == data.ID;
+                            });
+                            row.css("background-color", "#" + data.rowColor);
+                        }
+
+                    } else {
+                        showMessage(data.message ?? 'Update gagal!', 'error');
+                    }
+                },
+                onFail: function (jqXHR, textStatus, errorThrown) {
+                    showMessage('Gagal update data: ' + errorThrown, 'error');
                 }
-            
-        } else {
-            showMessage(data.message ?? 'Update gagal!', 'error');
-        }
-    },
-    onFail: function (jqXHR, textStatus, errorThrown) {
-        showMessage('Gagal update data: ' + errorThrown, 'error');
-    }
-});
+            });
 
 
-// Custom tombol Edit (toggle jadi Save)
-$(document).on("click", ".btnEdit", function () {
-    let id = $(this).data("id");
-    let $row = $("#excelTable").find("tr").filter(function () {
-        return $(this).find("td:first").text() == id;
-    });
+            // Custom tombol Edit (toggle jadi Save)
+            $(document).on("click", ".btnEdit", function () {
+                let id = $(this).data("id");
+                let $row = $("#excelTable").find("tr").filter(function () {
+                    return $(this).find("td:first").text() == id;
+                });
 
-    // Kalau belum edit → masuk mode edit
-    if (!$row.hasClass("editing")) {
-        $row.find(".tabledit-edit-button").trigger("click");
-        $row.addClass("editing");
-        $(this).html('<i class="fas fa-save"></i>'); // ganti ikon jadi save
-        $(this).removeClass("btn-primary").addClass("btn-success");
-    } 
-    // Kalau sudah edit → simpan
-    else {
-        $row.find(".tabledit-save-button").trigger("click");
-        $row.removeClass("editing");
-        $(this).html('<i class="fas fa-edit"></i>'); // balik lagi ke edit
-        $(this).removeClass("btn-success").addClass("btn-primary");
-    }
-});
+                // Kalau belum edit → masuk mode edit
+                if (!$row.hasClass("editing")) {
+                    $row.find(".tabledit-edit-button").trigger("click");
+                    $row.addClass("editing");
+                    $(this).html('<i class="fas fa-save"></i>'); // ganti ikon jadi save
+                    $(this).removeClass("btn-primary").addClass("btn-success");
+                }
+                // Kalau sudah edit → simpan
+                else {
+                    $row.find(".tabledit-save-button").trigger("click");
+                    $row.removeClass("editing");
+                    $(this).html('<i class="fas fa-edit"></i>'); // balik lagi ke edit
+                    $(this).removeClass("btn-success").addClass("btn-primary");
+                }
+            });
 
 
             // Reset form saat modal ditutup
@@ -607,4 +623,5 @@ $(document).on("click", ".btnEdit", function () {
         });
     </script>
 </body>
+
 </html>
