@@ -33,6 +33,8 @@
             background-color: var(--background-body);
             color: var(--text-color-dark);
             line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Navigasi */
@@ -67,6 +69,7 @@
             border-radius: 0.5rem; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
             padding: 1.5rem;
+            overflow-x: auto; /* Tambahan untuk scroll pada tabel */
         }
         
         .dataTables_wrapper {
@@ -81,13 +84,13 @@
         }
 
         table.dataTable {
-            border-collapse: separate !important; /* Penting untuk border-radius */
+            border-collapse: separate !important; 
             border-spacing: 0;
             margin-top: 1rem !important;
             border-radius: 0.5rem;
-            overflow: hidden; /* Menyembunyikan border yang keluar */
-            table-layout: fixed; /* Mencegah kolom melebar tidak terkontrol */
-            width: 100% !important; /* Memastikan tabel mengisi lebar kontainer */
+            overflow: hidden; 
+            table-layout: auto; /* Mengubah table-layout ke auto untuk responsivitas */
+            width: 100% !important; 
         }
         
         table.dataTable thead th {
@@ -111,9 +114,9 @@
         table.dataTable tbody td {
             padding: 0.9rem 1.25rem;
             border-top: 1px solid var(--border-color-light);
-            white-space: normal; /* Membungkus teks panjang */
+            white-space: normal; 
             word-wrap: break-word;
-            overflow-wrap: break-word; /* Properti modern untuk word-wrap */
+            overflow-wrap: break-word; 
         }
 
         /* Tampilan Alternating Row Color */
@@ -214,7 +217,7 @@
             border: 1px solid var(--primary-color) !important;
         }
 
-        /* Responsive adjustments for mobile */
+        /* Penyesuaian Responsif untuk perangkat seluler */
         @media (max-width: 768px) {
             .table-container {
                 padding: 1rem;
@@ -293,9 +296,9 @@
                 var table = $('#excelTable').DataTable({
                     pageLength: 25,
                     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    order: [[0, "asc"]], // Ganti indeks order ke 1 (kolom Nama)
-                    responsive: false, // Menonaktifkan fitur responsif
-                    scrollX: false, // Menonaktifkan scroll horizontal
+                    order: [[0, "asc"]], // Mengatur pengurutan pada kolom pertama
+                    responsive: true,
+                    scrollX: false,
                     language: {
                         search: "Pencarian:",
                         lengthMenu: "Tampilkan _MENU_ data per halaman",
@@ -308,24 +311,11 @@
                         }
                     },
                     columnDefs: [
-                        { "targets": 0, "orderable": false, "className": "text-center", "width": "50px" },
                         { "targets": '_all', "orderable": true, "className": "" }
-                    ],
-                    drawCallback: function () {
-                        var api = this.api();
-                        var pageInfo = api.page.info();
-                        api.column(0, { page: 'current' }).nodes().each(function (cell, i) {
-                            cell.innerHTML = i + 1 + pageInfo.start;
-                        });
-                    }
+                    ]
                 });
 
-                // Tambahkan kolom "No" di bagian depan header tabel
-                $('#excelTable thead tr').prepend('<th></th>');
-                
-                // Tambahkan sel "No" kosong di bagian depan setiap baris data
-                $('#excelTable tbody tr').prepend('<td></td>');
-
+                // Tambahkan legenda pencarian di atas tabel
                 $('.dataTables_filter').prepend(`
                     <div class="legend-container">
                         <div class="legend-item">

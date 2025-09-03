@@ -92,12 +92,12 @@
 @include('layouts.navigation')
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 80px);">
-    <div class="card w-100" style="max-width: 800px;">~
+    <div class="card w-100" style="max-width: 800px;">
         <div class="card-header text-center">
             <h2 class="fw-bold mb-0">Tentang Aplikasi Ini</h2>
         </div>
         <div class="card-body">
-            <p class="lead text-center mb-4">Aplikasi ini dikembangkan sebagai proyek PKL di BPJS Ketenagakerjaan Medan Kota. Tujuannya adalah untuk mempermudah manajemen dalam mengelola dan mendata penugasan karyawan untuk kunjungan ke berbagai wilayah.</p>
+            <p class="lead text-center mb-4">Aplikasi ini dikembangkan oleh mahasiswa PKL <b>(Universitas Methodist Indonesia)</b> sebagai proyek PKL di BPJS Ketenagakerjaan Medan Kota. Tujuannya adalah untuk mempermudah manajemen dalam mengelola dan mendata penugasan karyawan untuk kunjungan ke berbagai wilayah.</p>
             
             <hr class="my-4">
             
@@ -114,7 +114,8 @@
                    class="btn btn-bpjs-green">
                     <i class="fas fa-arrow-left me-2"></i> Kembali
                 </a>
-                <p class="text-end text-muted mb-0"><strong>Pengembang:</strong> Tim PKL BPJS Ketenagakerjaan Medan Kota</p>
+                <p class="text-end text-muted mb-0"><strong>Pengembang:</strong> Tim PKL BPJS Ketenagakerjaan Medan Kota</p><br>
+                
             </div>
         </div>
     </div>
