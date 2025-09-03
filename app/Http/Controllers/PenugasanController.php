@@ -41,7 +41,7 @@ class PenugasanController extends Controller
             'kecamatan_id' => 'required|exists:kecamatans,id',
             'deskripsi' => 'required|string',
             'alamat_lengkap' => 'required|string',
-            'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'required|image|mimes:jpeg,png,jpg|max:20048',
         ]);
 
         // 2. Proses penyimpanan file foto
@@ -80,7 +80,7 @@ class PenugasanController extends Controller
             'kecamatan_id' => 'required|exists:kecamatans,id',
             'alamat_lengkap' => 'required|string',
             // Tambahkan validasi untuk foto jika ingin bisa diubah saat edit
-            'photo' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'sometimes|image|mimes:jpeg,png,jpg|max:20048',
         ]);
 
         $data = $request->except('photo');
