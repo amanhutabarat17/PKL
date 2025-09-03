@@ -140,7 +140,7 @@
         <div class="flex justify-between items-center h-20 px-4 md:px-8 lg:px-12">
             <div class="flex items-center gap-10">
                 <h1 class="flex items-center">
-                    <img src="{{ asset('gambar/BPJS.png') }}" alt="Logo BPJS" class="w-52 h-auto drop-shadow-lg">
+                    <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
                 </h1>
                 <div class="hidden lg:flex gap-6">
                     <a href="{{ route('bpjs.ketenagakerjaan') }}"
