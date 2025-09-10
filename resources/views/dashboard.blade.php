@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html lang="id">
-
+<html>
 <head>
-    <title>Dashboard</title>
+    <title>Dashboard Pengguna</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -18,6 +22,7 @@
                 },
             },
         };
+        
     </script>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -286,11 +291,16 @@
         .status-modal-button:hover {
             background-color: #2563eb;
         }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body>
-    @include('layouts.navigation')
+  
+      @include('layouts.navigation')
     <div class="container-fluid p-4">
 
         <!-- Custom Status Modal -->
@@ -327,10 +337,6 @@
                                 @endforeach
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <!-- <button class="btn btn-sm btn-primary btnEdit" data-id="{{ $row[0] }}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                -->
                                         <button class="btn btn-sm btnHapus" data-id="{{ $row[0] }}" data-nama="{{ $row[1] }}"
                                             title="Hapus">
                                             <i class="fas fa-trash-alt"></i>
@@ -348,7 +354,7 @@
                     <i class="fas fa-info-circle me-2"></i>
                     Tidak ada data untuk ditampilkan.
                 </div>
-                <button id="btnTambah" type="button" class="btn btn-success ms-3">
+                <button id="btnTambah" type="button" class="btn btn-success ms-3" data-bs-toggle="modal" data-bs-target="#tambahModal">
                     <i class="fas fa-plus me-2"></i> Tambah Data
                 </button>
             </div>
@@ -388,17 +394,20 @@
 
                             <!-- Jenis Klaim -->
                             <div class="col-md-6 mb-3">
-                                <label for="jenisKlaim" class="form-label">Jenis Klaim <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="jenisKlaim" name="Jenis Klaim" required>
+                                <label for="jenisKlaim" class="form-label">Jenis Klaim</label>
+                                <select class="form-control" id="jenisKlaim" name="Jenis Klaim">
+                                    <option value="JKM">JKM</option>
+                                    <option value="JKK">JKK</option>
+                                    <option value="JHT">JHT</option>
+                                    <option value="JP">JP</option>
+                                    <option value="JKP">JKP</option>
+                                </select>
                             </div>
 
                             <!-- Tanggal Terima -->
                             <div class="col-md-6 mb-3">
-                                <label for="tanggalTerima" class="form-label">Tanggal Terima <span
-                                        class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima"
-                                    required>
+                                <label for="tanggalTerima" class="form-label">Tanggal Terima </label>
+                                <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima" required>
                             </div>
 
                             <!-- Tanggal Rekam -->
@@ -412,15 +421,16 @@
                             <div class="col-md-6 mb-3">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-control" id="status" name="Status">
-                                    <option value="Diterima">Pending</option>
+                                    <option value="Pending">Pending</option>
                                     <option value="Ditolak">Ditolak</option>
-                                    <option value="Pending">Diterima</option>
+                                    <option value="Diterima">Diterima</option>
                                 </select>
                             </div>
 
                             <!-- Tanggal Meninggal -->
                             <div class="col-md-6 mb-3">
-                                <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
+                                <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal <span
+                                        class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
                             </div>
 
@@ -441,7 +451,6 @@
                                 <label for="petugas" class="form-label">Petugas</label>
                                 <input type="text" class="form-control" id="petugas" name="Petugas">
                             </div>
-
                         </div>
                     </form>
                 </div>
@@ -449,18 +458,15 @@
                 <!-- Footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
-                        Batal
+                        <i class="fas fa-times me-1"></i> Batal
                     </button>
-                    <button type="submit" form="formTambah" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>
-                        Simpan Data
+                    <button type="submit" form="formTambah" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Simpan
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- Modal Hapus -->
     <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
@@ -494,39 +500,71 @@
 
     <script>
         $(document).ready(function () {
-            let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
+            // Variabel global untuk modal instances
+            let tambahModal;
+            let modalHapus;
+
+            // Initialize modals
+            function initializeModals() {
+                tambahModal = new bootstrap.Modal(document.getElementById('tambahModal'), {
+                    backdrop: true,
+                    keyboard: true
+                });
+                
+                modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'), {
+                    backdrop: true,
+                    keyboard: true
+                });
+            }
+
+            // Call initialize function
+            initializeModals();
 
             // Reusable function to show the status modal
             function showStatusModal(type, title, message) {
                 const modal = $('#statusModal');
-                const content = modal.find('.status-modal-content');
                 const icon = modal.find('.status-modal-icon');
                 const titleEl = modal.find('.status-modal-title');
                 const messageEl = modal.find('.status-modal-message');
 
-                // Set icon and colors based on type
                 if (type === 'success') {
-                    icon.html('<i class="fas fa-check-circle"></i>').parent().removeClass('status-modal-error').addClass('status-modal-success');
+                    modal.removeClass('status-modal-error').addClass('status-modal-success');
+                    icon.html('<i class="fas fa-check-circle"></i>');
                 } else {
-                    icon.html('<i class="fas fa-times-circle"></i>').parent().removeClass('status-modal-success').addClass('status-modal-error');
+                    modal.removeClass('status-modal-success').addClass('status-modal-error');
+                    icon.html('<i class="fas fa-times-circle"></i>');
                 }
 
                 titleEl.text(title);
                 messageEl.text(message);
 
+                // Show modal
                 modal.removeClass('hidden').addClass('show');
             }
 
             // Function to close the status modal
             function closeStatusModal() {
-                $('#statusModal').removeClass('show').addClass('hidden');
+                const modal = $('#statusModal');
+                modal.removeClass('show status-modal-success status-modal-error').addClass('hidden');
             }
 
             // Close status modal on button click
-            $('#closeStatusModal').on('click', closeStatusModal);
+            $('#closeStatusModal').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeStatusModal();
+            });
+
+            // Close status modal when clicking outside
+            $('#statusModal').on('click', function (e) {
+                if ($(e.target).is('#statusModal')) {
+                    closeStatusModal();
+                }
+            });
 
             // Click delete button
-            $(document).on('click', '.btnHapus', function () {
+            $(document).on('click', '.btnHapus', function (e) {
+                e.preventDefault();
                 const id = $(this).data('id');
                 const nama = $(this).data('nama');
 
@@ -537,11 +575,11 @@
             });
 
             // Confirm delete
-            $('#btnKonfirmasiHapus').on('click', function () {
+            $('#btnKonfirmasiHapus').on('click', function (e) {
+                e.preventDefault();
                 const id = $('#hapusId').val();
 
-                // Show a loading/processing message (optional, but good UX)
-                closeStatusModal();
+                // Hide modal first
                 modalHapus.hide();
 
                 $.ajax({
@@ -571,9 +609,12 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            $(document).on('click', '#btnDownloadExcel', function () {
+
+            $(document).on('click', '#btnDownloadExcel', function (e) {
+                e.preventDefault();
                 window.location.href = "{{ route('excel.download') }}";
             });
+
             // Function pesan alert
             function showMessage(message, type) {
                 var alertClass = type === 'success' ? 'alert-success' : 'alert-error';
@@ -593,7 +634,7 @@
                     pageLength: 25,
                     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
                     order: [[0, "asc"]],
-                    scrollX: true, // Enable horizontal scrolling
+                    scrollX: true,
                     language: {
                         search: "Pencarian:",
                         lengthMenu: "Tampilkan _MENU_ data per halaman",
@@ -609,44 +650,37 @@
 
                 // Add "Tambah Data" button and legend
                 $('.dataTables_filter').append(`
-    <div class="legend-container d-flex align-items-center gap-3 ms-3">
-        <div class="d-flex align-items-center gap-2">
-            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
-            <small>≤ 6 bulan</small>
-            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
-            <small>> 6 bulan</small>
-        </div>
+                    <div class="legend-container d-flex align-items-center gap-3 ms-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
+                            <small>≤ 6 bulan</small>
+                            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
+                            <small>> 6 bulan</small>
+                            <span style="display:inline-block;width:20px;height:20px;background:#32CD32;border:1px solid #000;"></span>
+            <small>Sudah Bayar</small>
+                        </div>
 
-        <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-file-excel me-2"></i> Download Excel
-        </button>
+                        <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-file-excel me-2"></i> Download Excel
+                        </button>
 
-        <button id="btnTambah" type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#tambahModal">
-            <i class="fas fa-plus me-2"></i> Tambah Data
-        </button>
-    </div>
-`);
-
+                        <button id="btnTambahDataTable" type="button" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus me-2"></i> Tambah Data
+                        </button>
+                    </div>
+                `);
             }
 
-
-            // Open add data modal
-            function openModal() {
-                let lastNo = 0;
-                $('#excelTable tbody tr').each(function () {
-                    let noVal = parseInt($(this).find('td').eq(1).text());
-                    if (!isNaN(noVal) && noVal > lastNo) {
-                        lastNo = noVal;
-                    }
-                });
-                $('#noField').val(lastNo + 1);
-
-                const modal = new bootstrap.Modal(document.getElementById('tambahModal'));
-                modal.show();
-            }
-
-            $(document).on('click', '#btnTambah', function () {
-                openModal();
+            // Open add data modal - Handler untuk tombol di DataTable
+            $(document).on('click', '#btnTambahDataTable', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Reset form
+                $('#formTambah')[0].reset();
+                
+                // Show modal
+                tambahModal.show();
             });
 
             // Submit add form
@@ -660,8 +694,10 @@
                     method: 'POST',
                     data: formData,
                     success: function (data) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('tambahModal'));
-                        if (modal) modal.hide();
+                        // Hide modal
+                        tambahModal.hide();
+                        
+                        // Reset form
                         $('#formTambah')[0].reset();
 
                         if (data.success) {
@@ -674,13 +710,13 @@
                         }
                     },
                     error: function () {
+                        tambahModal.hide();
                         showStatusModal('error', 'Gagal!', 'Terjadi kesalahan saat menambahkan data.');
                     }
                 });
             });
 
             // Tabledit inline edit
-            // Init Tabledit
             $('#excelTable').Tabledit({
                 url: '{{ route("excel.update") }}',
                 method: 'POST',
@@ -688,7 +724,7 @@
                 deleteButton: false,
                 saveButton: false,
                 restoreButton: false,
-                buttons: {}, // disable bawaan
+                buttons: {},
                 columns: {
                     identifier: [0, "ID"],
                     editable: [
@@ -697,7 +733,7 @@
                                 [{{ $i }}, "{{ addslashes($col) }}"],
                             @endif
                         @endforeach
-        ]
+                    ]
                 },
                 onSuccess: function (data, textStatus, jqXHR) {
                     if (data.success) {
@@ -708,7 +744,6 @@
                             });
                             row.css("background-color", "#" + data.rowColor);
                         }
-
                     } else {
                         showMessage(data.message ?? 'Update gagal!', 'error');
                     }
@@ -718,33 +753,35 @@
                 }
             });
 
-
             // Custom tombol Edit (toggle jadi Save)
-            $(document).on("click", ".btnEdit", function () {
+            $(document).on("click", ".btnEdit", function (e) {
+                e.preventDefault();
                 let id = $(this).data("id");
                 let $row = $("#excelTable").find("tr").filter(function () {
                     return $(this).find("td:first").text() == id;
                 });
 
-                // Kalau belum edit → masuk mode edit
                 if (!$row.hasClass("editing")) {
                     $row.find(".tabledit-edit-button").trigger("click");
                     $row.addClass("editing");
-                    $(this).html('<i class="fas fa-save"></i>'); // ganti ikon jadi save
+                    $(this).html('<i class="fas fa-save"></i>');
                     $(this).removeClass("btn-primary").addClass("btn-success");
-                }
-                // Kalau sudah edit → simpan
-                else {
+                } else {
                     $row.find(".tabledit-save-button").trigger("click");
                     $row.removeClass("editing");
-                    $(this).html('<i class="fas fa-edit"></i>'); // balik lagi ke edit
+                    $(this).html('<i class="fas fa-edit"></i>');
                     $(this).removeClass("btn-success").addClass("btn-primary");
                 }
             });
 
-            // Reset form when modal is closed
-            document.getElementById('tambahModal').addEventListener('hidden.bs.modal', function () {
+            // Reset form when Bootstrap modals are hidden
+            $('#tambahModal').on('hidden.bs.modal', function () {
                 $('#formTambah')[0].reset();
+            });
+
+            $('#modalHapus').on('hidden.bs.modal', function () {
+                $('#hapusId').val('');
+                $('#hapusNama').text('');
             });
         });
     </script>
