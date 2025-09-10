@@ -1,4 +1,3 @@
-  @include('layouts.navigation')
 <!DOCTYPE html>
 <html lang="id">
 
@@ -9,7 +8,7 @@
 
 
 <script src="https://cdn.tailwindcss.com"></script>
-
+<script src="//unpkg.com/alpinejs" defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -297,7 +296,7 @@
 </head>
 
 <body>
-  
+    @include('layouts.navigation')
     
     <div class="container-fluid p-4">
 

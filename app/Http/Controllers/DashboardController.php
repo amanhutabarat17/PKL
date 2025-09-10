@@ -20,22 +20,21 @@ class DashboardController extends Controller
     /**
      * Re-number ulang kolom A supaya selalu urut dari 1
      */
-   private function renumberRows($sheet)
-{
-    $highestRow = $sheet->getHighestRow();
-    $number = 1;
+    private function renumberRows($sheet)
+    {
+        $rowNumber = 1;
+        $highestRow = $sheet->getHighestRow();
 
-    for ($row = $this->startRow; $row <= $highestRow; $row++) {
-        $val = $sheet->getCell('B' . $row)->getValue(); // cek kolom Nama
-        if (!empty($val)) {
-            $sheet->setCellValue('A' . $row, $number);
-            $number++;
-        } else {
-            $sheet->setCellValue('A' . $row, ''); // kalau kosong, biarin kosong
+        for ($row = $this->startRow; $row <= $highestRow; $row++) {
+            $nama = $sheet->getCell('B' . $row)->getValue();
+            if (!empty($nama)) {
+                $sheet->setCellValue('A' . $row, $rowNumber);
+                $rowNumber++;
+            } else {
+                $sheet->setCellValue('A' . $row, null); // Kosongkan ID
+            }
         }
     }
-}
-
 
     /**
      * Helper: Terapkan warna baris sesuai selisih tanggal
@@ -44,9 +43,21 @@ class DashboardController extends Controller
     {
         $tglRekam = $sheet->getCell('F' . $rowIndex)->getValue();
         $tglMeninggal = $sheet->getCell('H' . $rowIndex)->getValue();
+        $status = strtolower(trim($sheet->getCell('G' . $rowIndex)->getValue())); // Ambil status dan normalisasi
 
+        // Jika status diterima → warna hijau
+        if ($status === 'diterima') {
+            $sheet->getStyle("A{$rowIndex}:K{$rowIndex}")
+                ->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setRGB('32CD32');
+            return;
+        }
+
+        // Skip jika tanggal kosong
         if (!$tglRekam || !$tglMeninggal) {
-            return; // skip kalau salah satu kosong
+            return;
         }
 
         // Konversi tanggal rekam
@@ -68,19 +79,19 @@ class DashboardController extends Controller
         $months = $diff->m + ($diff->y * 12);
 
         if ($months > 6) {
-            // Lebih dari 6 bulan → baris merah tua
+            // Lebih dari 6 bulan → warna merah tua
             $sheet->getStyle("A{$rowIndex}:K{$rowIndex}")
                 ->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()
-                ->setRGB('FFFF00'); // DarkRed
+                ->setRGB('CC0000'); // Merah tua
         } else {
-            // 6 bulan ke bawah → baris kuning
+            // 6 bulan ke bawah → warna kuning
             $sheet->getStyle("A{$rowIndex}:K{$rowIndex}")
                 ->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()
-                ->setRGB('CC0000'); // Yellow
+                ->setRGB('FFFF00'); // Kuning
         }
     }
 
@@ -127,7 +138,20 @@ class DashboardController extends Controller
                 $rowColors[] = $fillColor ?: 'FFFFFF';
             }
 
-            session(['idMapping' => $idMapping]);
+            // Re-index rows dengan urutan yang benar
+            $reindexedRows = [];
+            $reindexedColors = [];
+            $newIdMapping = [];
+
+            foreach ($rows as $i => $row) {
+                $newId = $i + 1;
+                $row[0] = $newId; // Update ID di kolom pertama
+                $reindexedRows[] = $row;
+                $reindexedColors[] = $rowColors[$i];
+                $newIdMapping[$newId] = $idMapping[$row[0]];
+            }
+
+            session(['idMapping' => $newIdMapping]);
 
             return view('dashboard', [
                 'header' => $header,
@@ -247,77 +271,77 @@ class DashboardController extends Controller
         }
     }
 
-   public function store(Request $request)
-{
-    try {
-        $path = storage_path('app/public/dataJKM.xlsx');
-        Log::info("Path Excel: " . $path);
+    public function store(Request $request)
+    {
+        try {
+            $path = storage_path('app/public/dataJKM.xlsx');
+            Log::info("Path Excel: " . $path);
 
-        if (!file_exists($path)) {
+            if (!file_exists($path)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File Excel tidak ditemukan di: ' . $path
+                ]);
+            }
+
+            $spreadsheet = IOFactory::load($path);
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Hitung jumlah data valid (cek kolom B = Nama)
+            $highestRow = $sheet->getHighestRow();
+            $dataCount = 0;
+            for ($row = $this->startRow; $row <= $highestRow; $row++) {
+                $val = $sheet->getCell('B' . $row)->getValue();
+                if (!empty($val)) {
+                    $dataCount++;
+                }
+            }
+
+            // Nomor baru = jumlah data + 1
+            $newNo = $dataCount + 1;
+
+            // Baris baru = baris terakhir + 1
+            $newRowIndex = $highestRow + 1;
+
+            // Insert data ke row baru - urut sesuai kolom di Excel
+            $newRowData = [
+                $newNo,                                // Kolom A: Nomor otomatis
+                $request->input('Nama'),               // Kolom B
+                $request->input('KPJ'),                // Kolom C
+                $request->input('Jenis_Klaim'),        // Kolom D
+                $request->input('Tanggal_Terima'),     // Kolom E
+                $request->input('Tanggal_Rekam'),      // Kolom F
+                $request->input('Status'),             // Kolom G
+                $request->input('Tanggal_Meninggal'),  // Kolom H
+                $request->input('Keterangan'),         // Kolom I
+                $request->input('Alamat'),             // Kolom J
+                $request->input('Petugas'),            // Kolom K
+            ];
+
+            $sheet->fromArray($newRowData, null, 'A' . $newRowIndex);
+
+            // Terapkan warna setelah insert
+            $this->applyRowColor($sheet, $newRowIndex);
+
+            // Renumber ulang supaya tetap rapih (antisipasi kalau ada baris kosong)
+            $this->renumberRows($sheet);
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($path);
+
+            Log::info("Data berhasil disimpan! Nomor: " . $newNo . ", Nama: " . $request->input('Nama'));
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil disimpan! Nomor: ' . $newNo
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Gagal Store: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
             return response()->json([
                 'success' => false,
-                'message' => 'File Excel tidak ditemukan di: ' . $path
+                'message' => 'Error: ' . $e->getMessage()
             ]);
         }
-
-        $spreadsheet = IOFactory::load($path);
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Hitung jumlah data valid (cek kolom B = Nama)
-        $highestRow = $sheet->getHighestRow();
-        $dataCount = 0;
-        for ($row = $this->startRow; $row <= $highestRow; $row++) {
-            $val = $sheet->getCell('B' . $row)->getValue();
-            if (!empty($val)) {
-                $dataCount++;
-            }
-        }
-
-        // Nomor baru = jumlah data + 1
-        $newNo = $dataCount + 1;
-
-        // Baris baru = baris terakhir + 1
-        $newRowIndex = $highestRow + 1;
-
-        // Insert data ke row baru - urut sesuai kolom di Excel
-        $newRowData = [
-            $newNo,                                // Kolom A: Nomor otomatis
-            $request->input('Nama'),               // Kolom B
-            $request->input('KPJ'),                // Kolom C
-            $request->input('Jenis_Klaim'),        // Kolom D
-            $request->input('Tanggal_Terima'),     // Kolom E
-            $request->input('Tanggal_Rekam'),      // Kolom F
-            $request->input('Status'),             // Kolom G
-            $request->input('Tanggal_Meninggal'),  // Kolom H
-            $request->input('Keterangan'),         // Kolom I
-            $request->input('Alamat'),             // Kolom J
-            $request->input('Petugas'),            // Kolom K
-        ];
-
-        $sheet->fromArray($newRowData, null, 'A' . $newRowIndex);
-
-        // Terapkan warna setelah insert
-        $this->applyRowColor($sheet, $newRowIndex);
-
-        // Renumber ulang supaya tetap rapih (antisipasi kalau ada baris kosong)
-        $this->renumberRows($sheet);
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($path);
-
-        Log::info("Data berhasil disimpan! Nomor: " . $newNo . ", Nama: " . $request->input('Nama'));
-        return response()->json([
-            'success' => true,
-            'message' => 'Data berhasil disimpan! Nomor: ' . $newNo
-        ]);
-    } catch (\Exception $e) {
-        Log::error("Gagal Store: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage()
-        ]);
     }
-}
 
 
     public function delete(Request $request)
@@ -342,22 +366,23 @@ class DashboardController extends Controller
         // Hapus baris sesuai ID
         $sheet->removeRow($rowIndex, 1);
 
+        // Renumber ulang kolom A supaya urut mulai dari 1
+        $this->renumberRows($sheet);
+
         // Bersihkan baris kosong dari bawah ke atas (cek kolom B = Nama)
         $highestRow = $sheet->getHighestRow();
         for ($row = $highestRow; $row >= $this->startRow; $row--) {
             $val = $sheet->getCell('B' . $row)->getValue();
             if (empty($val)) {
                 $sheet->removeRow($row, 1);
-            } else {
-                break; // ketemu data terakhir, stop
             }
         }
 
-        // Renumber ulang kolom A supaya urut mulai dari 1
-        $this->renumberRows($sheet);
-
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
+
+        // PENTING: Hapus session idMapping agar di-reload ulang
+        session()->forget('idMapping');
 
         return response()->json([
             'success' => true,
@@ -371,20 +396,20 @@ class DashboardController extends Controller
 }
 
     public function download()
-{
-    $path = storage_path('app/public/dataJKM.xlsx');
+    {
+        $path = storage_path('app/public/dataJKM.xlsx');
 
-    if (!file_exists($path)) {
-        return redirect()->back()->with('error', 'File Excel tidak ditemukan.');
+        if (!file_exists($path)) {
+            return redirect()->back()->with('error', 'File Excel tidak ditemukan.');
+        }
+
+        return response()->download($path, 'dataJKM.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
-
-    return response()->download($path, 'dataJKM.xlsx', [
-        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Cache-Control' => 'no-cache, no-store, must-revalidate',
-        'Pragma' => 'no-cache',
-        'Expires' => '0',
-    ]);
-}
 
 
 }

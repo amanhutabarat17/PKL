@@ -67,6 +67,7 @@
         .mobile-dropdown a:hover {
             background-color: #f3f4f6;
         }
+    
     </style>
 </head>
 
@@ -78,19 +79,19 @@
                     <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
                 </h1>
 
-                <div class="hidden lg:flex gap-4">
+                <div class=" lg:flex gap-4">
                     {{-- Navigasi untuk Admin --}}
                     @if(Auth::check() && Auth::user()->role === 'admin')
                     <a href="{{ route('bpjs.ketenagakerjaan') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
                     </a>
                     <a href="{{ route('dashboard') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
                     </a>
                     <a href="{{ route('penugasan.index') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
                     </a>
                     {{-- Navigasi untuk User Biasa --}}
