@@ -654,6 +654,8 @@
                             <small>≤ 6 bulan</small>
                             <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
                             <small>> 6 bulan</small>
+                            <span style="display:inline-block;width:20px;height:20px;background:#32CD32;border:1px solid #000;"></span>
+            <small>Sudah Bayar</small>
                         </div>
 
                         <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary btn-sm">
