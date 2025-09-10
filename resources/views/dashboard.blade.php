@@ -404,8 +404,7 @@
 
                             <!-- Tanggal Terima -->
                             <div class="col-md-6 mb-3">
-                                <label for="tanggalTerima" class="form-label">Tanggal Terima <span
-                                        class="text-danger">*</span></label>
+                                <label for="tanggalTerima" class="form-label">Tanggal Terima </label>
                                 <input type="date" class="form-control" id="tanggalTerima" name="Tanggal Terima" required>
                             </div>
 
@@ -428,7 +427,8 @@
 
                             <!-- Tanggal Meninggal -->
                             <div class="col-md-6 mb-3">
-                                <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal</label>
+                                <label for="tanggalMeninggal" class="form-label">Tanggal Meninggal <span
+                                        class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="tanggalMeninggal" name="Tanggal Meninggal">
                             </div>
 
