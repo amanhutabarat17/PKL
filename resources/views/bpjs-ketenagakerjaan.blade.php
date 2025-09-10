@@ -341,7 +341,7 @@
                             </svg>
                             <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Klik untuk
                                     mengunggah</span> atau seret dan lepas</p>
-                            <p class="text-xs text-gray-500">PNG, JPG, JPEG (Maks. 2MB)</p>
+                            <p class="text-xs text-gray-500">PNG, JPG, JPEG (Maks. 10MB)</p>
                         </div>
                         <input id="dropzone-file" type="file" name="photo" class="hidden" required />
                     </label>

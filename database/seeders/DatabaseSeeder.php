@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         // karena Kecamatan butuh data dari Kabupaten.
         $this->call([
             AdminUserSeeder::class, // Tambahkan baris ini untuk membuat akun admin
+            CsUserSeeder::class,
             KabupatenSeeder::class,
             KecamatanSeeder::class,
             // Anda bisa menambahkan seeder lain di sini jika ada

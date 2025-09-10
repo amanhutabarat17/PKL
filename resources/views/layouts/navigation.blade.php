@@ -93,6 +93,16 @@
                         class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
                     </a>
+                    {{-- Navigasi untuk CS --}}
+                    @elseif(Auth::check() && Auth::user()->role === 'cs')
+                    <a href="{{ route('bpjs.ketenagakerjaancs') }}"
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                    </a>
+                    <a href="{{ route('dashboardcs') }}"
+                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
+                    </a>
                     {{-- Navigasi untuk User Biasa --}}
                     @else
                     <a href="{{ route('bpjs.ketenagakerjaanuser') }}"

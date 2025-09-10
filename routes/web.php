@@ -9,15 +9,13 @@ use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BpjsKetenagakerjaanController;
-
-
-// Tambahkan use statement ini di bagian atas
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\DashboardUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-
+use App\Http\Middleware\CsAccessMiddleware;
+use App\Http\Controllers\DashboardCsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +53,16 @@ Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkE
 Route::get('reset-password', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
+
+Route::get('/bpjs/ketenagakerjaan/cs', [BpjsKetenagakerjaanController::class, 'showCsPage'])
+    ->name('bpjs.ketenagakerjaancs');
+   // Rute untuk halaman dashboard CS
+Route::get('/dashboardcs', [DashboardCsController::class, 'index'])->name('dashboardcs');
+
+Route::post('/dashboardcs/update', [DashboardCsController::class, 'update'])->name('cs.update');
+Route::post('/dashboardcs/store', [DashboardCsController::class, 'store'])->name('cs.store');
+Route::post('/dashboardcs/delete', [DashboardCsController::class, 'delete'])->name('cs.delete');
+Route::get('/dashboardcs/download', [DashboardCsController::class, 'download'])->name('cs.download');   
 
 
 // 🔹 Grup rute untuk user yang SUDAH login
