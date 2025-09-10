@@ -78,36 +78,35 @@
                     <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
                 </h1>
 
-                <div class="hidden lg:flex gap-4">
-                    {{-- Navigasi untuk Admin --}}
-                    @if(Auth::check() && Auth::user()->role === 'admin')
+                  <div class=" lg:flex gap-3">
+                @if(Auth::check() && Auth::user()->role === 'admin')
                     <a href="{{ route('bpjs.ketenagakerjaan') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
                     </a>
                     <a href="{{ route('dashboard') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
                     </a>
                     <a href="{{ route('penugasan.index') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
                     </a>
                 @elseif(Auth::check())
                     <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-[0_8px_15px_rgba(0,0,0,0.5)] no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
                     </a>
                     <a href="{{ route('dashboarduser') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
                     </a>
                     <a href="{{ route('penugasanuser') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
+                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
                     </a>
-                    @endif
-                </div>
+                @endif
+            </div>
             </div>
 
             <div x-data="{ open: false }" class="relative flex items-center gap-4">
