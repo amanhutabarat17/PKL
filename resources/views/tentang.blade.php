@@ -110,7 +110,7 @@
 
             <div class="mt-5 d-flex justify-content-between align-items-center">
                 <!-- Logika dinamis untuk tombol kembali -->
-                <a href="{{ Auth::user()->role === 'admin' ? route('bpjs.ketenagakerjaan') : route('bpjs.ketenagakerjaanuser') }}"
+                <a href="{{ Auth::user()->role === 'admin' ? route('bpjs.ketenagakerjaan') : (Auth::user()->role === 'cs' ? route('bpjs.ketenagakerjaancs') : route('bpjs.ketenagakerjaanuser')) }}"
                    class="btn btn-bpjs-green">
                     <i class="fas fa-arrow-left me-2"></i> Kembali
                 </a>

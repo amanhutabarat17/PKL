@@ -177,13 +177,13 @@
             </div>
 
             <div class="flex items-center justify-between mt-6">
-                <a href="{{ Auth::user()->role === 'admin' ? route('bpjs.ketenagakerjaan') : route('bpjs.ketenagakerjaanuser') }}"
-                   class="inline-flex items-center btn-bpjs font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Kembali
-                </a>
+                <a href="{{ Auth::user()->role === 'admin' ? route('bpjs.ketenagakerjaan') : (Auth::user()->role === 'cs' ? route('bpjs.ketenagakerjaancs') : route('bpjs.ketenagakerjaanuser')) }}"
+    class="inline-flex items-center btn-bpjs font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    Kembali
+</a>
 
                 <button type="submit" class="btn-bpjs font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300 ease-in-out">
                     Simpan

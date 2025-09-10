@@ -40,10 +40,15 @@ class LoginController extends Controller
 
             // Cek role pengguna dan arahkan ke dashboard yang sesuai
             if ($user->role === 'admin') {
-                return redirect()->intended('/bpjs-ketenagakerjaan');
+                return redirect()->intended(route('bpjs.ketenagakerjaan'));
             }
 
-            // Ini adalah baris yang diubah
+            // Tambahkan logika untuk role 'cs'
+            if ($user->role === 'cs') {
+                return redirect()->intended(route('bpjs.ketenagakerjaancs'));
+            }
+            
+            // Logika untuk user biasa
             return redirect()->intended(route('bpjs.ketenagakerjaanuser'));
         }
 

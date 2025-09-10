@@ -93,8 +93,7 @@
                         class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
                         <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
                     </a>
-                    {{-- Navigasi untuk User Biasa --}}
-                    @else
+                @elseif(Auth::check())
                     <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
                         class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
                         <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>

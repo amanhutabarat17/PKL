@@ -54,7 +54,7 @@ class Kernel extends HttpKernel
      *
      * @var array
      */
-    protected $middlewareAliases = [
+    protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -66,5 +66,15 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // Tambahkan alias middleware kustom Anda di sini.
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'auth.cs'w => \App\Http\Middleware\CsAccessMiddleware::class,
+    ];
+
+    /**
+     * Grup middleware lama, diubah menjadi alias agar tidak terjadi error.
+     *
+     * @var array
+     */
+    protected $middlewareAliases = [
+        // Tidak ada lagi middleware di sini, aliasnya telah dipindahkan ke $routeMiddleware.
     ];
 }

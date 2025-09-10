@@ -28,6 +28,20 @@ class BpjsKetenagakerjaanController extends Controller
     }
 
     /**
+     * Tampilkan halaman untuk CS.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function showCsPage()
+    {
+        // Middleware akan menangani otorisasi, jadi tidak perlu pengecekan role di sini
+        // Ambil semua foto dari database untuk ditampilkan di galeri cs
+        $photos = Photo::orderBy('created_at', 'desc')->get();
+        
+        return view('cs.bpjs-ketenagakerjaan', compact('photos'));
+    }
+    
+    /**
      * Tampilkan halaman untuk pengguna (user).
      *
      * @return \Illuminate\View\View
@@ -49,7 +63,7 @@ class BpjsKetenagakerjaanController extends Controller
     {
         // Validasi input, termasuk 'description'
         $request->validate([
-            'photo' => 'required|image|max:2048', // Maksimal 2MB
+            'photo' => 'required|image|max:20048', // Maksimal 20MB
             'description' => 'nullable|string', // Kolom deskripsi bisa kosong
         ]);
 
