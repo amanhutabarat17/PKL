@@ -4,107 +4,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPJS Navigation Bar</title>
+    <title>Enhanced Navigation Bar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
     <style>
-        #desktopMenuBtn:active {
-  transform: none !important;
-  box-shadow: inherit !important;
-}
-
         body {
             font-family: 'Inter', sans-serif;
         }
 
-        .hamburger-line {
+        /* CSS untuk ikon hamburger dan animasinya */
+        .hamburger-icon span {
             display: block;
             width: 25px;
             height: 3px;
             background-color: #1e40af;
+            /* Biru gelap */
             border-radius: 9999px;
             transition: all 0.3s ease-in-out;
-            margin: 4px 0;
         }
 
-        .hamburger-active .hamburger-line:nth-child(1) {
+        .hamburger-icon span:nth-child(2) {
+            margin: 5px 0;
+        }
+
+        .hamburger-icon.open span:nth-child(1) {
             transform: rotate(-45deg) translate(-5px, 6px);
         }
 
-        .hamburger-active .hamburger-line:nth-child(2) {
+        .hamburger-icon.open span:nth-child(2) {
             opacity: 0;
         }
 
-        .hamburger-active .hamburger-line:nth-child(3) {
+        .hamburger-icon.open span:nth-child(3) {
             transform: rotate(45deg) translate(-5px, -6px);
         }
 
-        .dropdown {
-            display: none;
+        /* Peningkatan untuk dropdown menu mobile */
+        .mobile-dropdown {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem;
         }
 
-        .dropdown.active {
-            display: block;
+        .mobile-dropdown a {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .mobile-dropdown a:hover {
+            background-color: #f3f4f6;
         }
     </style>
 </head>
 
-   {{-- Navbar Component --}}
-<nav class="w-full bg-gradient-to-r from-sky-500 via-green-500 to-green-600 shadow-2xl shadow-green-600/50 relative z-50">
-    <div class="flex justify-between items-center h-20 px-8 lg:px-12">
-        <!-- Left Section: Logo + Navigation -->
-        <div class="flex items-center gap-6 lg:gap-10">
-            <!-- Logo -->
-            <div class="flex items-center">
-                <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-32 lg:w-40 h-auto drop-shadow-lg">
-            </div>
+<body>
+    <nav class="w-full bg-gradient-to-r from-sky-500 via-green-500 to-green-600 shadow-2xl shadow-green-600/50 z-50">
+        <div class="flex justify-between items-center h-20 px-8 lg:px-12">
+            <div class="flex items-center gap-10">
+                <h1 class="flex items-center">
+                    <img src="{{ asset('gambar/logoo.png') }}" alt="Logo BPJS" class="w-40 h-auto drop-shadow-lg">
+                </h1>
 
-            <!-- Desktop Navigation Menu -->
-            <div class=" lg:flex gap-3">
+                  <div class="lg:flex gap-3">
+                {{-- Navigasi untuk Admin --}}
                 @if(Auth::check() && Auth::user()->role === 'admin')
-                    <a href="{{ route('bpjs.ketenagakerjaan') }}"
-                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
-                    </a>
-                    <a href="{{ route('dashboard') }}"
-                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
-                    </a>
-                    <a href="{{ route('penugasan.index') }}"
-                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
-                    </a>
-<<<<<<< HEAD
-                    {{-- Navigasi untuk CS --}}
-                    @elseif(Auth::check() && Auth::user()->role === 'cs')
-                    <a href="{{ route('bpjs.ketenagakerjaancs') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
-                    </a>
-                    <a href="{{ route('dashboardcs') }}"
-                        class="group text-white font-semibold text-lg px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white shadow-xl">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
-                    </a>
-                    {{-- Navigasi untuk User Biasa --}}
-                    @else
-=======
-                @elseif(Auth::check())
->>>>>>> 01b6432fea89018b6a06ce01e68fc18993b59fd9
-                    <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
-                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-[0_8px_15px_rgba(0,0,0,0.5)] no-underline">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
-                    </a>
-                    <a href="{{ route('dashboarduser') }}"
-                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
-                    </a>
-                    <a href="{{ route('penugasanuser') }}"
-                        class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
-                        <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
-                    </a>
+                <a href="{{ route('bpjs.ketenagakerjaan') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                </a>
+                <a href="{{ route('dashboard') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
+                </a>
+                <a href="{{ route('penugasan.index') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
+                </a>
+
+                {{-- Navigasi untuk CS --}}
+                @elseif(Auth::check() && Auth::user()->role === 'cs')
+                <a href="{{ route('bpjs.ketenagakerjaancs') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                </a>
+                <a href="{{ route('dashboardcs') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
+                </a>
+
+                {{-- Navigasi untuk User Biasa --}}
+                @else
+                <a href="{{ route('bpjs.ketenagakerjaanuser') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">BPJS Ketenagakerjaan</span>
+                </a>
+                <a href="{{ route('dashboarduser') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">Beranda</span>
+                </a>
+                <a href="{{ route('penugasanuser') }}"
+                    class="group shadow-md hover:shadow-xl text-white font-semibold text-base lg:text-lg px-3 lg:px-4 py-2 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:bg-white hover:shadow-xl no-underline">
+                    <span class="group-hover:text-green-600 transition-colors duration-150">Penugasan</span>
+                </a>
                 @endif
             </div>
-        </div>
+            </div>
 
         <!-- Right Section: User Profile -->
         @if(Auth::check())

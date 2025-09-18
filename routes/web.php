@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\PetugasController; // Tambahkan baris ini
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\DashboardController;
@@ -65,6 +65,10 @@ Route::post('/dashboardcs/delete', [DashboardCsController::class, 'delete'])->na
 Route::get('/dashboardcs/download', [DashboardCsController::class, 'download'])->name('cs.download');   
 
 
+
+Route::post('/assign-petugas', [PetugasController::class, 'assignPetugas'])->name('assign.petugas');
+
+
 // 🔹 Grup rute untuk user yang SUDAH login
 Route::middleware('auth')->group(function () {
     // Logout (POST)
@@ -127,6 +131,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasan.index');
     Route::post('/penugasan', [PenugasanController::class, 'store'])->name('penugasan.store');
     Route::get('/get-kecamatan/{kabupaten_id}', [PenugasanController::class, 'getKecamatan']);
+    // Tambahkan baris ini ke file routes/web.php Anda
+
 
 
     Route::get('/penugasan/create', [PenugasanController::class, 'create'])->name('penugasan.create');

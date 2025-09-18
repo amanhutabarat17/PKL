@@ -299,6 +299,56 @@
 </head>
 
 <body>
+
+<div class="modal fade" id="assignPetugasModal" tabindex="-1" aria-labelledby="assignPetugasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignPetugasModalLabel">Tugaskan Petugas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignPetugasForm" action="{{ route('assign.petugas') }}" method="POST">
+                @csrf
+                <input type="hidden" name="penugasan_id" id="penugasan_id">
+                <div class="modal-body">
+                    <p>Pilih petugas yang akan ditugaskan:</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="petugas_id[]" value="1" id="petugas1">
+                        <label class="form-check-label" for="petugas1">
+                            Ahmad
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="petugas_id[]" value="2" id="petugas2">
+                        <label class="form-check-label" for="petugas2">
+                            Dewi
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="petugas_id[]" value="3" id="petugas3">
+                        <label class="form-check-label" for="petugas3">
+                            Budi
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="petugas_id[]" value="4" id="petugas4">
+                        <label class="form-check-label" for="petugas4">
+                            Siti
+                        </label>
+                    </div>
+                    <div class="mb-3 mt-4">
+                        <label for="deskripsi_penugasan" class="form-label">Deskripsi Penugasan (Opsional)</label>
+                        <textarea class="form-control" name="deskripsi" id="deskripsi_penugasan" rows="3" placeholder="Contoh: Mohon segera hubungi peserta untuk konfirmasi jadwal."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Tugaskan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
   
       @include('layouts.navigation')
     <div class="container-fluid p-4">
@@ -329,23 +379,32 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($rows as $i => $row)
-                            @php $rowColor = $rowColors[$i] ?? null; @endphp
-                            <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
-                                @foreach($row as $cell)
-                                    <td>{{ $cell ?? '' }}</td>
-                                @endforeach
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <button class="btn btn-sm btnHapus" data-id="{{ $row[0] }}" data-nama="{{ $row[1] }}"
-                                            title="Hapus">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
+    @foreach($rows as $i => $row)
+        @php $rowColor = $rowColors[$i] ?? null; @endphp
+        <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
+            @foreach($row as $cell)
+                <td>{{ $cell ?? '' }}</td>
+            @endforeach
+            <td>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btnHapus" data-id="{{ $row[0] }}" data-nama="{{ $row[1] }}"
+                        title="Hapus">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <a href="{{ route('penugasan.create', ['id' => $row[0]]) }}" class="btn btn-sm btn-primary btnUpload" title="Unggah Penugasan">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </a>
+                    {{-- Ini adalah tombol yang diubah --}}
+                    <button class="btn btn-sm btn-success btnAssignPetugas" 
+                            title="Tugaskan Petugas" 
+                            data-id="{{ $row[0] }}">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    @endforeach
+</tbody>
                 </table>
             </div>
         @else
@@ -499,292 +558,379 @@
     <script src="https://markcell.github.io/jquery-tabledit/assets/js/tabledit.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            // Variabel global untuk modal instances
-            let tambahModal;
-            let modalHapus;
+    $(document).ready(function () {
+        // Variabel global untuk modal instances
+        let tambahModal;
+        let modalHapus;
+        let assignPetugasModal;
 
-            // Initialize modals
-            function initializeModals() {
-                tambahModal = new bootstrap.Modal(document.getElementById('tambahModal'), {
-                    backdrop: true,
-                    keyboard: true
-                });
-                
-                modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'), {
-                    backdrop: true,
-                    keyboard: true
-                });
+        // Initialize modals
+        function initializeModals() {
+            tambahModal = new bootstrap.Modal(document.getElementById('tambahModal'), {
+                backdrop: true,
+                keyboard: true
+            });
+            
+            modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'), {
+                backdrop: true,
+                keyboard: true
+            });
+
+            // Inisialisasi modal penugasan
+            assignPetugasModal = new bootstrap.Modal(document.getElementById('assignPetugasModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+        }
+
+        // Call initialize function
+        initializeModals();
+
+        // Reusable function to show the status modal
+        function showStatusModal(type, title, message) {
+            const modal = $('#statusModal');
+            const icon = modal.find('.status-modal-icon');
+            const titleEl = modal.find('.status-modal-title');
+            const messageEl = modal.find('.status-modal-message');
+
+            if (type === 'success') {
+                modal.removeClass('status-modal-error').addClass('status-modal-success');
+                icon.html('<i class="fas fa-check-circle"></i>');
+            } else {
+                modal.removeClass('status-modal-success').addClass('status-modal-error');
+                icon.html('<i class="fas fa-times-circle"></i>');
             }
 
-            // Call initialize function
-            initializeModals();
+            titleEl.text(title);
+            messageEl.text(message);
 
-            // Reusable function to show the status modal
-            function showStatusModal(type, title, message) {
-                const modal = $('#statusModal');
-                const icon = modal.find('.status-modal-icon');
-                const titleEl = modal.find('.status-modal-title');
-                const messageEl = modal.find('.status-modal-message');
+            // Show modal
+            modal.removeClass('hidden').addClass('show');
+        }
 
-                if (type === 'success') {
-                    modal.removeClass('status-modal-error').addClass('status-modal-success');
-                    icon.html('<i class="fas fa-check-circle"></i>');
-                } else {
-                    modal.removeClass('status-modal-success').addClass('status-modal-error');
-                    icon.html('<i class="fas fa-times-circle"></i>');
-                }
+        // Function to close the status modal
+        function closeStatusModal() {
+            const modal = $('#statusModal');
+            modal.removeClass('show status-modal-success status-modal-error').addClass('hidden');
+        }
 
-                titleEl.text(title);
-                messageEl.text(message);
+        // Close status modal on button click
+        $('#closeStatusModal').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeStatusModal();
+        });
 
-                // Show modal
-                modal.removeClass('hidden').addClass('show');
-            }
-
-            // Function to close the status modal
-            function closeStatusModal() {
-                const modal = $('#statusModal');
-                modal.removeClass('show status-modal-success status-modal-error').addClass('hidden');
-            }
-
-            // Close status modal on button click
-            $('#closeStatusModal').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        // Close status modal when clicking outside
+        $('#statusModal').on('click', function (e) {
+            if ($(e.target).is('#statusModal')) {
                 closeStatusModal();
-            });
-
-            // Close status modal when clicking outside
-            $('#statusModal').on('click', function (e) {
-                if ($(e.target).is('#statusModal')) {
-                    closeStatusModal();
-                }
-            });
-
-            // Click delete button
-            $(document).on('click', '.btnHapus', function (e) {
-                e.preventDefault();
-                const id = $(this).data('id');
-                const nama = $(this).data('nama');
-
-                $('#hapusId').val(id);
-                $('#hapusNama').text(nama);
-
-                modalHapus.show();
-            });
-
-            // Confirm delete
-            $('#btnKonfirmasiHapus').on('click', function (e) {
-                e.preventDefault();
-                const id = $('#hapusId').val();
-
-                // Hide modal first
-                modalHapus.hide();
-
-                $.ajax({
-                    url: '{{ route("excel.delete") }}',
-                    method: 'POST',
-                    data: {
-                        ID: id,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            showStatusModal('success', 'Berhasil Dihapus!', response.message);
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            showStatusModal('error', 'Gagal!', response.message);
-                        }
-                    },
-                    error: function () {
-                        showStatusModal('error', 'Gagal!', 'Gagal menghapus data. Terjadi kesalahan.');
-                    }
-                });
-            });
-
-            // Setup CSRF token
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            $(document).on('click', '#btnDownloadExcel', function (e) {
-                e.preventDefault();
-                window.location.href = "{{ route('excel.download') }}";
-            });
-
-            // Function pesan alert
-            function showMessage(message, type) {
-                var alertClass = type === 'success' ? 'alert-success' : 'alert-error';
-                $('#message').html('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>');
-
-                setTimeout(function () {
-                    $('.alert').alert('close');
-                }, 5000);
             }
+        });
 
-            // DataTable init
-            if ($('#excelTable').length) {
-                var table = $('#excelTable').DataTable({
-                    pageLength: 25,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    order: [[0, "asc"]],
-                    scrollX: true,
-                    language: {
-                        search: "Pencarian:",
-                        lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                        paginate: {
-                            first: "Pertama",
-                            last: "Terakhir",
-                            next: "Selanjutnya",
-                            previous: "Sebelumnya"
-                        }
-                    }
-                });
+        // Click delete button
+        $(document).on('click', '.btnHapus', function (e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            const nama = $(this).data('nama');
 
-                // Add "Tambah Data" button and legend
-                $('.dataTables_filter').append(`
-                    <div class="legend-container d-flex align-items-center gap-3 ms-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
-                            <small>≤ 6 bulan</small>
-                            <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
-                            <small>> 6 bulan</small>
-                            <span style="display:inline-block;width:20px;height:20px;background:#32CD32;border:1px solid #000;"></span>
-            <small>Sudah Bayar</small>
-                        </div>
+            $('#hapusId').val(id);
+            $('#hapusNama').text(nama);
 
-                        <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-file-excel me-2"></i> Download Excel
-                        </button>
+            modalHapus.show();
+        });
 
-                        <button id="btnTambahDataTable" type="button" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus me-2"></i> Tambah Data
-                        </button>
-                    </div>
-                `);
-            }
+        // Confirm delete
+        $('#btnKonfirmasiHapus').on('click', function (e) {
+            e.preventDefault();
+            const id = $('#hapusId').val();
 
-            // Open add data modal - Handler untuk tombol di DataTable
-            $(document).on('click', '#btnTambahDataTable', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Reset form
-                $('#formTambah')[0].reset();
-                
-                // Show modal
-                tambahModal.show();
-            });
+            // Hide modal first
+            modalHapus.hide();
 
-            // Submit add form
-            $('#formTambah').on('submit', function (e) {
-                e.preventDefault();
-
-                let formData = $(this).serialize();
-
-                $.ajax({
-                    url: '{{ route("excel.store") }}',
-                    method: 'POST',
-                    data: formData,
-                    success: function (data) {
-                        // Hide modal
-                        tambahModal.hide();
-                        
-                        // Reset form
-                        $('#formTambah')[0].reset();
-
-                        if (data.success) {
-                            showStatusModal('success', 'Data Berhasil Ditambahkan!', 'Data Anda telah berhasil disimpan.');
-                            setTimeout(function () {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            showStatusModal('error', 'Gagal Menambahkan Data!', 'Terjadi kesalahan saat menyimpan data.');
-                        }
-                    },
-                    error: function () {
-                        tambahModal.hide();
-                        showStatusModal('error', 'Gagal!', 'Terjadi kesalahan saat menambahkan data.');
-                    }
-                });
-            });
-
-            // Tabledit inline edit
-            $('#excelTable').Tabledit({
-                url: '{{ route("excel.update") }}',
+            $.ajax({
+                url: '{{ route("excel.delete") }}',
                 method: 'POST',
-                editButton: false,
-                deleteButton: false,
-                saveButton: false,
-                restoreButton: false,
-                buttons: {},
-                columns: {
-                    identifier: [0, "ID"],
-                    editable: [
-                        @foreach($header as $i => $col)
-                            @if($i > 0)
-                                [{{ $i }}, "{{ addslashes($col) }}"],
-                            @endif
-                        @endforeach
-                    ]
+                data: {
+                    ID: id,
+                    _token: $('meta[name="csrf-token"]').attr('content')
                 },
-                onSuccess: function (data, textStatus, jqXHR) {
-                    if (data.success) {
-                        showMessage(data.message ?? 'Data berhasil diperbarui!', 'success');
-                        if (data.rowColor) {
-                            let row = $("#excelTable tbody tr").filter(function () {
-                                return $(this).find("td:first").text() == data.ID;
-                            });
-                            row.css("background-color", "#" + data.rowColor);
-                        }
+                success: function (response) {
+                    if (response.success) {
+                        showStatusModal('success', 'Berhasil Dihapus!', response.message);
+                        setTimeout(() => location.reload(), 1500);
                     } else {
-                        showMessage(data.message ?? 'Update gagal!', 'error');
+                        showStatusModal('error', 'Gagal!', response.message);
                     }
                 },
-                onFail: function (jqXHR, textStatus, errorThrown) {
-                    showMessage('Gagal update data: ' + errorThrown, 'error');
+                error: function () {
+                    showStatusModal('error', 'Gagal!', 'Gagal menghapus data. Terjadi kesalahan.');
                 }
-            });
-
-            // Custom tombol Edit (toggle jadi Save)
-            $(document).on("click", ".btnEdit", function (e) {
-                e.preventDefault();
-                let id = $(this).data("id");
-                let $row = $("#excelTable").find("tr").filter(function () {
-                    return $(this).find("td:first").text() == id;
-                });
-
-                if (!$row.hasClass("editing")) {
-                    $row.find(".tabledit-edit-button").trigger("click");
-                    $row.addClass("editing");
-                    $(this).html('<i class="fas fa-save"></i>');
-                    $(this).removeClass("btn-primary").addClass("btn-success");
-                } else {
-                    $row.find(".tabledit-save-button").trigger("click");
-                    $row.removeClass("editing");
-                    $(this).html('<i class="fas fa-edit"></i>');
-                    $(this).removeClass("btn-success").addClass("btn-primary");
-                }
-            });
-
-            // Reset form when Bootstrap modals are hidden
-            $('#tambahModal').on('hidden.bs.modal', function () {
-                $('#formTambah')[0].reset();
-            });
-
-            $('#modalHapus').on('hidden.bs.modal', function () {
-                $('#hapusId').val('');
-                $('#hapusNama').text('');
             });
         });
-    </script>
+
+        // Setup CSRF token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $(document).on('click', '#btnDownloadExcel', function (e) {
+            e.preventDefault();
+            window.location.href = "{{ route('excel.download') }}";
+        });
+
+        // Function pesan alert
+        function showMessage(message, type) {
+            var alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            $('#message').html('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>');
+
+            setTimeout(function () {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        // DataTable init
+        if ($('#excelTable').length) {
+            var table = $('#excelTable').DataTable({
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                order: [[0, "asc"]],
+                scrollX: true,
+                language: {
+                    search: "Pencarian:",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
+            });
+
+            // Add "Tambah Data" button and legend
+            $('.dataTables_filter').append(`
+                <div class="legend-container d-flex align-items-center gap-3 ms-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>
+                        <small>≤ 6 bulan</small>
+                        <span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>
+                        <small>> 6 bulan</small>
+                        <span style="display:inline-block;width:20px;height:20px;background:#32CD32;border:1px solid #000;"></span>
+                        <small>Sudah Bayar</small>
+                    </div>
+
+                    <button id="btnDownloadExcel" type="button" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-file-excel me-2"></i> Download Excel
+                    </button>
+
+                    <button id="btnTambahDataTable" type="button" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus me-2"></i> Tambah Data
+                    </button>
+                </div>
+            `);
+        }
+
+        // Open add data modal - Handler untuk tombol di DataTable
+        $(document).on('click', '#btnTambahDataTable', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Reset form
+            $('#formTambah')[0].reset();
+            
+            // Show modal
+            tambahModal.show();
+        });
+
+        // Submit add form
+        $('#formTambah').on('submit', function (e) {
+            e.preventDefault();
+
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: '{{ route("excel.store") }}',
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    // Hide modal
+                    tambahModal.hide();
+                    
+                    // Reset form
+                    $('#formTambah')[0].reset();
+
+                    if (data.success) {
+                        showStatusModal('success', 'Data Berhasil Ditambahkan!', 'Data Anda telah berhasil disimpan.');
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showStatusModal('error', 'Gagal Menambahkan Data!', 'Terjadi kesalahan saat menyimpan data.');
+                    }
+                },
+                error: function () {
+                    tambahModal.hide();
+                    showStatusModal('error', 'Gagal!', 'Terjadi kesalahan saat menambahkan data.');
+                }
+            });
+        });
+
+        // Tabledit inline edit
+        $('#excelTable').Tabledit({
+            url: '{{ route("excel.update") }}',
+            method: 'POST',
+            editButton: false,
+            deleteButton: false,
+            saveButton: false,
+            restoreButton: false,
+            buttons: {},
+            columns: {
+                identifier: [0, "ID"],
+                editable: [
+                    @foreach($header as $i => $col)
+                        @if($i > 0)
+                            [{{ $i }}, "{{ addslashes($col) }}"],
+                        @endif
+                    @endforeach
+                ]
+            },
+            onSuccess: function (data, textStatus, jqXHR) {
+                if (data.success) {
+                    showMessage(data.message ?? 'Data berhasil diperbarui!', 'success');
+                    if (data.rowColor) {
+                        let row = $("#excelTable tbody tr").filter(function () {
+                            return $(this).find("td:first").text() == data.ID;
+                        });
+                        row.css("background-color", "#" + data.rowColor);
+                    }
+                } else {
+                    showMessage(data.message ?? 'Update gagal!', 'error');
+                }
+            },
+            onFail: function (jqXHR, textStatus, errorThrown) {
+                showMessage('Gagal update data: ' + errorThrown, 'error');
+            }
+        });
+
+        // Custom tombol Edit (toggle jadi Save)
+        $(document).on("click", ".btnEdit", function (e) {
+            e.preventDefault();
+            let id = $(this).data("id");
+            let $row = $("#excelTable").find("tr").filter(function () {
+                return $(this).find("td:first").text() == id;
+            });
+
+            if (!$row.hasClass("editing")) {
+                $row.find(".tabledit-edit-button").trigger("click");
+                $row.addClass("editing");
+                $(this).html('<i class="fas fa-save"></i>');
+                $(this).removeClass("btn-primary").addClass("btn-success");
+            } else {
+                $row.find(".tabledit-save-button").trigger("click");
+                $row.removeClass("editing");
+                $(this).html('<i class="fas fa-edit"></i>');
+                $(this).removeClass("btn-success").addClass("btn-primary");
+            }
+        });
+
+        // Reset form when Bootstrap modals are hidden
+        $('#tambahModal').on('hidden.bs.modal', function () {
+            $('#formTambah')[0].reset();
+        });
+
+        $('#modalHapus').on('hidden.bs.modal', function () {
+            $('#hapusId').val('');
+            $('#hapusNama').text('');
+        });
+
+        // --- Logika Penugasan Petugas ---
+
+
+
+
+    $(document).ready(function () {
+    // ... (kode inisialisasi dan fungsi lain yang sudah ada)
+
+    // Event handler untuk tombol 'Tugaskan Petugas'
+    $(document).on('click', '.btnAssignPetugas', function(e) {
+        e.preventDefault();
+        
+        // Temukan baris tabel terdekat dari tombol yang diklik
+        const $row = $(this).closest('tr');
+
+        // Ambil data dari kolom yang sesuai
+        const penugasanData = {
+            // Asumsi: ID ada di kolom pertama (indeks 0)
+            id: $row.find('td:eq(0)').text().trim(), 
+            // Asumsi: Nama ada di kolom kedua (indeks 1)
+            nama: $row.find('td:eq(1)').text().trim(),
+            // Asumsi: KPJ ada di kolom ketiga (indeks 2)
+            kpj: $row.find('td:eq(2)').text().trim(),
+        };
+
+        // Simpan ID penugasan ke dalam input hidden di modal
+        $('#penugasan_id').val(penugasanData.id);
+
+        // Simpan data lengkap ke elemen form menggunakan .data()
+        // Ini adalah cara terbaik untuk menyimpan data sementara
+        $('#assignPetugasForm').data('penugasan-detail', penugasanData);
+
+        // Tampilkan modal
+        assignPetugasModal.show();
+    });
+
+    // Event handler untuk form penugasan
+    $('#assignPetugasForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = $(this);
+        // Gunakan serializeArray() untuk memanipulasi data sebelum dikirim
+        const formData = form.serializeArray();
+        
+        // Ambil data penugasan yang sudah kita simpan di langkah sebelumnya
+        const penugasanDetail = form.data('penugasan-detail');
+
+        // Tambahkan data detail penugasan (nama dan kpj) ke dalam array data form
+        // Kita kirim sebagai string JSON agar mudah diterima di server
+        formData.push({
+            name: 'penugasan_data',
+            value: JSON.stringify(penugasanDetail)
+        });
+        
+        // Sembunyikan modal penugasan
+        assignPetugasModal.hide();
+        
+        // Kirim permintaan AJAX dengan data yang sudah diperbarui
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            // Gunakan $.param() untuk mengonversi array ke format yang benar
+            data: $.param(formData),
+            success: function(response) {
+                if (response.success) {
+                    showStatusModal('success', 'Berhasil!', response.message);
+                } else {
+                    showStatusModal('error', 'Gagal!', response.message);
+                }
+            },
+            error: function() {
+                showStatusModal('error', 'Gagal!', 'Terjadi kesalahan saat menugaskan petugas.');
+            }
+        });
+    });
+
+    // ... (sisa kode JavaScript Anda)
+});
+        });
+    
+</script>
 </body>
 
 </html>
