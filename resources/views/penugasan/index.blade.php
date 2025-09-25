@@ -123,7 +123,7 @@
             let text = row.textContent.toLowerCase();
             if (text.includes(filter)) {
                 row.style.display = "";
-            } else {
+            } else {    
                 row.style.display = "none";
             }
         });
