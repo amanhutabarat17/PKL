@@ -1,11 +1,11 @@
-{{-- resources/views/penugasan/create.blade.php --}}
+{{-- resources/views/penugasan/create.blade.php (Sudah Diperbaiki) --}}
 @extends('layouts.app')
 
 @section('content')
 <style>
 
     /* Style Anda tidak diubah */
-   
+    
     .form-container { max-width: 42rem; margin-left: auto; margin-right: auto; padding: 2rem 1rem; }
     .form-card { background-color: #f0fdf4; border: 1px solid #10b981; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25); padding: 2.5rem; transition: transform 0.3s ease-in-out; }
     .form-card:hover { transform: translateY(-5px); }
@@ -166,14 +166,14 @@ body {
             <h1 class="text-3xl font-extrabold form-title">Tambah Penugasan Baru</h1>
         </div>
         
-        <!-- [PERBAIKAN 1] Menambahkan enctype untuk upload file -->
         <form action="{{ route('penugasan.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+            <input type="hidden" name="data_row_id" value="{{ $dataId }}">
 
             <div class="mb-4">
                 <label for="nama_karyawan" class="block form-label text-sm font-bold mb-2">Nama Petugas</label>
                 <input type="text" id="nama_karyawan" name="nama_karyawan" class="w-full px-4 py-3 rounded-xl focus:outline-none form-input" value="{{ old('nama_karyawan') }}" required>
-                <!-- [PERBAIKAN 2] Menampilkan pesan error validasi -->
                 @error('nama_karyawan')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -202,7 +202,6 @@ body {
                 @enderror
             </div> 
             
-            <!-- [PERBAIKAN 3] Memperbaiki id dan name yang duplikat -->
             <div class="mb-4">
                 <label for="deskripsi" class="block form-label text-sm font-bold mb-2">Deskripsi</label>
                 <textarea id="deskripsi" name="deskripsi" rows="3" class="w-full px-4 py-3 rounded-xl focus:outline-none form-textarea" required>{{ old('deskripsi') }}</textarea>
@@ -244,7 +243,6 @@ body {
     </div>
 </div>
 
-<!-- Custom Alert Modal -->
 <div id="customAlert" class="modal-overlay">
     <div class="modal-content">
         <div id="modalIcon" class="modal-icon"></div>
@@ -303,7 +301,11 @@ body {
 
         // Function to handle redirection
         function redirectToIndex() {
+            // Perhatikan: Anda menggunakan route('dashboard') di Controller, tetapi di sini Anda
+            // ingin redirect ke index penugasan setelah berhasil. Sesuaikan jika perlu.
             window.location.href = '{{ route('penugasan.index') }}';
+            // Jika ingin kembali ke dashboard seperti yang ada di controller: 
+            // window.location.href = '{{ route('dashboard') }}';
         }
 
         // Event listener for the close button, also handles redirection

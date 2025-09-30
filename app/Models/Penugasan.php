@@ -14,15 +14,21 @@ class Penugasan extends Model
      *
      * @var array<int, string>
      */
-  // app/Models/Penugasan.php
+    protected $fillable = [
+        'nama_karyawan',
+        'kecamatan_id',
+        'alamat_lengkap',
+        'deskripsi',
+        'photo_path',
+        'data_row_id', 
+    ];
+    
+    // PERBAIKAN KRUSIAL: Pastikan created_at dan updated_at di-cast sebagai datetime
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
-protected $fillable = [
-    'nama_karyawan',
-    'kecamatan_id',
-    'alamat_lengkap',
-    'deskripsi',    // <-- TAMBAHKAN INI
-    'photo_path',   // <-- TAMBAHKAN INI JUGA
-];
 
     /**
      * Get the kecamatan that owns the penugasan.

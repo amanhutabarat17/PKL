@@ -1,5 +1,5 @@
 <?php
-use App\Http\Controllers\PetugasController; // Tambahkan baris ini
+use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\DashboardController;
@@ -31,7 +31,7 @@ Route::get('/', function () {
 // Rute ini tampaknya tidak terdefinisi dengan benar, saya akan meninggalkannya
 // dan menyarankan untuk mengecek kembali penggunaan dan tujuannya.
 Route::post('/bpjs.ketenagakerjaanuser', [OtpVerificationController::class, 'verify']);
-
+Route::post('/assign/petugas', [PetugasController::class, 'assignPetugas'])->name('assign.petugas');
 // 🔹 Grup rute untuk user yang BELUM login
 Route::middleware('guest')->group(function () {
     // Register + OTP
@@ -47,27 +47,24 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
     // Rute untuk Lupa Kata Sandi berbasis tautan
-Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::get('reset-password', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+    Route::get('reset-password', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
 Route::get('/bpjs/ketenagakerjaan/cs', [BpjsKetenagakerjaanController::class, 'showCsPage'])
     ->name('bpjs.ketenagakerjaancs');
-   // Rute untuk halaman dashboard CS
+// Rute untuk halaman dashboard CS
 Route::get('/dashboardcs', [DashboardCsController::class, 'index'])->name('dashboardcs');
 
 Route::post('/dashboardcs/update', [DashboardCsController::class, 'update'])->name('cs.update');
 Route::post('/dashboardcs/store', [DashboardCsController::class, 'store'])->name('cs.store');
 Route::post('/dashboardcs/delete', [DashboardCsController::class, 'delete'])->name('cs.delete');
-Route::get('/dashboardcs/download', [DashboardCsController::class, 'download'])->name('cs.download');   
-
-
+Route::get('/dashboardcs/download', [DashboardCsController::class, 'download'])->name('cs.download');
 
 Route::post('/assign-petugas', [PetugasController::class, 'assignPetugas'])->name('assign.petugas');
-
 
 // 🔹 Grup rute untuk user yang SUDAH login
 Route::middleware('auth')->group(function () {
@@ -92,11 +89,12 @@ Route::middleware('auth')->group(function () {
         ->name('bpjs.ketenagakerjaan.store');
     Route::delete('/bpjs-ketenagakerjaan/{photo}', [BpjsKetenagakerjaanController::class, 'destroy'])
         ->name('bpjs.ketenagakerjaan.destroy');
+    
     // Halaman Tentang
     Route::get('/user/bpjs-ketenagakerjaan', [BpjsKetenagakerjaanController::class, 'showUserGallery'])->name('bpjs.ketenagakerjaanuser');
-//download excel
+    
+    // Download excel
     Route::get('/excel/download', [DashboardController::class, 'download'])->name('excel.download');
-
 
 
     // Rute untuk user yang sudah login dan terverifikasi
@@ -105,40 +103,39 @@ Route::middleware('auth')->group(function () {
         // Grup rute dengan awalan 'user'
         Route::prefix('user')->group(function () {
             // Rute untuk dashboard user
-        
-            Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard'); 
-            Route::get('/user/dashboard', [DashboardUserController::class, 'index'])->name('dashboarduser');
+            Route::get('/dashboard', [DashboardUserController::class, 'index'])->name('user.dashboard'); 
+            Route::get('/dashboard', [DashboardUserController::class, 'index'])->name('dashboarduser');
 
             // Rute untuk daftar penugasan user
             Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasanuser');
         });
 
     });
+    
+    // Rute Umum dan API
+    Route::get('/get-kecamatan/{kabupaten_id}', [PenugasanController::class, 'getKecamatan'])->name('get.kecamatan');
+    Route::get('/api/penugasan/{dataRowId}', [PenugasanController::class, 'getPenugasansByDataId']); 
 
     Route::get('/tentang', fn () => view('tentang'))->name('tentang');
 
     // Profil
-    Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasan.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::get('/destroy', function () {
-    })->name('penugasan.destroy');
-    Route::get('/keluar', function () {
-        session()->invalidate();
-        session()->regenerateToken();
-        return redirect('/');
-    })->name('keluar');
-    Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasan.index');
-    Route::post('/penugasan', [PenugasanController::class, 'store'])->name('penugasan.store');
-    Route::get('/get-kecamatan/{kabupaten_id}', [PenugasanController::class, 'getKecamatan']);
-    // Tambahkan baris ini ke file routes/web.php Anda
-
-
-
-    Route::get('/penugasan/create', [PenugasanController::class, 'create'])->name('penugasan.create');
-    Route::get('/penugasan/{penugasan}/edit', [PenugasanController::class, 'edit'])->name('penugasan.edit');
-    Route::put('/penugasan/{penugasan}', [PenugasanController::class, 'update'])->name('penugasan.update');
-    Route::delete('/penugasan/{penugasan}', [PenugasanController::class, 'destroy'])->name('penugasan.destroy');
+    
+    // MENGGANTI RUTE INDIVIDU PENUGASAN DENGAN RESOURCE ROUTE
+    Route::resource('penugasan', PenugasanController::class)->except([
+        'show'
+    ]);
+    
+    // MENGHAPUS RUTE DUPLIKASI BERIKUT INI:
+    // Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasan.index');
+    // Route::get('/destroy', function () {})->name('penugasan.destroy'); <-- INI PENTING DIHAPUS
+    // Route::get('/penugasan', [PenugasanController::class, 'index'])->name('penugasan.index');
+    // Route::post('/penugasan', [PenugasanController::class, 'store'])->name('penugasan.store');
+    // Route::get('/penugasan/create', [PenugasanController::class, 'create'])->name('penugasan.create');
+    // Route::get('/penugasan/{penugasan}/edit', [PenugasanController::class, 'edit'])->name('penugasan.edit');
+    // Route::put('/penugasan/{penugasan}', [PenugasanController::class, 'update'])->name('penugasan.update');
+    // Route::delete('/penugasan/{penugasan}', [PenugasanController::class, 'destroy'])->name('penugasan.destroy');
 
     // 🔹 Logout via GET (opsional, jika kamu pakai tombol biasa)
     Route::get('/keluar', function () {
@@ -148,11 +145,10 @@ Route::middleware('auth')->group(function () {
     })->name('keluar');
 });
 
-// KODE BARU DITAMBAHKAN DI SINI
 // Route ini akan menangani permintaan gambar dari storage
-Route::get('/storage/photos/{filename}', function ($filename) {
+Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
     // Path file di dalam folder storage/app/public/
-    $path = 'photos/' . $filename;
+    $path = $folder . '/' . $filename;
 
     // Cek apakah file ada
     if (!Storage::disk('public')->exists($path)) {
