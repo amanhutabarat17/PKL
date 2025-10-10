@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Penugasan;
 use App\Models\Kabupaten;
 use App\Models\Kecamatan;
+// PENTING: Ganti 'DataKlaim' dengan nama Model yang sesuai untuk data utama Anda.
+use App\Models\DataKlaim; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage; 
-use Illuminate\Support\Facades\Log; // Gunakan Log untuk error handling
+use Illuminate\Support\Facades\Log;
 
 class PenugasanController extends Controller
 {
@@ -67,8 +69,8 @@ class PenugasanController extends Controller
 
         Penugasan::create($penugasanData); 
         
-        // Sesuaikan route redirect jika perlu kembali ke dashboard utama setelah upload
-        return redirect()->route('dashboard')->with('success', 'Penugasan baru berhasil diunggah.');
+        // PERUBAHAN: Mengarahkan kembali ke halaman sebelumnya (dashboard pengguna)
+        return redirect()->back()->with('success', 'Penugasan baru berhasil diunggah.');
     }
 
     /**
@@ -127,7 +129,6 @@ class PenugasanController extends Controller
         $penugasan->delete();
 
         // 3. Redirect kembali ke daftar penugasan (penugasan.index) dengan pesan sukses.
-        // Laravel akan secara otomatis menangani respons HTTP yang tepat untuk DELETE.
         return redirect()->route('penugasan.index')->with('success', 'Penugasan berhasil dihapus.');
     }
 
@@ -144,36 +145,22 @@ class PenugasanController extends Controller
 
     /**
      * Mengambil daftar penugasan yang telah diunggah berdasarkan ID data master.
-     * Dipanggil melalui AJAX dari tombol 'Melihat' di dashboard.
-     * @param int $dataRowId ID dari baris data master (dari tabel Excel/Data Utama)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function getPenugasansByDataId($dataRowId)
     {
         try {
-            // TIDAK PERLU eager load relasi kecamatan.kabupaten lagi
             $penugasans = Penugasan::where('data_row_id', $dataRowId) 
                 ->orderBy('created_at', 'desc')
                 ->get()
-                // Map data untuk menyesuaikan penamaan field di JavaScript frontend (dashboard.blade.php)
                 ->map(function ($penugasan) {
-                    
-                    // KITA HAPUS SEMUA LOGIKA RELASI KABUPATEN DAN KECAMATAN DI SINI
-
                     return [
-                        // Nama field yang diminta JS:
-                        'nama_petugas'     => $penugasan->nama_karyawan ?? 'N/A', // Mapping nama_karyawan ke nama_petugas
+                        'nama_petugas'     => $penugasan->nama_karyawan ?? 'N/A',
                         'tanggal_unggah'   => $penugasan->created_at ? $penugasan->created_at->format('Y-m-d H:i:s') : 'N/A',
-                        
-                        // Perbaikan: Gunakan pesan yang jelas jika data NULL di database
                         'deskripsi'        => $penugasan->deskripsi ?? 'DATA DESKRIPSI HILANG', 
                         'alamat_lengkap'   => $penugasan->alamat_lengkap ?? 'ALAMAT LENGKAP HILANG', 
-                        
-                        // Kirim nilai NULL untuk field yang tidak dibutuhkan (Kabupaten/Kecamatan)
                         'kabupaten'        => null, 
                         'kecamatan'        => null, 
-                        
-                        'file_path'        => $penugasan->photo_path ?? null, // Mapping photo_path ke file_path
+                        'file_path'        => $penugasan->photo_path ?? null,
                     ];
                 });
 
@@ -192,7 +179,6 @@ class PenugasanController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            // Log error untuk membantu debugging server
             Log::error("Error fetching penugasans for data ID {$dataRowId}: " . $e->getMessage());
             
             return response()->json([
@@ -202,4 +188,49 @@ class PenugasanController extends Controller
             ], 500); 
         }
     }
+
+    // --- [BARU] FUNGSI UNTUK UPDATE STATUS DARI DASHBOARD ---
+    /**
+     * Memperbarui status baris data dari panggilan AJAX di dashboard.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(Request $request)
+    {
+        // 1. Validasi data yang masuk
+        $validated = $request->validate([
+            'ID' => 'required|integer',
+            'Status' => 'required|string|in:Pending,Sedang Diproses,Diterima,Ditolak'
+        ]);
+
+        try {
+            // 2. Cari data berdasarkan ID. 
+            // GANTI 'DataKlaim' dengan nama Model Anda yang sebenarnya.
+            // Asumsi: Tabelnya `data_klaims` dan primary key-nya `id`.
+            $dataRow = DataKlaim::findOrFail($validated['ID']);
+            
+            // 3. Update kolom 'Status'.
+            // GANTI 'Status' jika nama kolom di database Anda berbeda.
+            $dataRow->Status = $validated['Status'];
+            $dataRow->save();
+
+            // 4. Kirim respons sukses kembali ke JavaScript
+            return response()->json([
+                'success' => true,
+                'message' => 'Status berhasil diperbarui.'
+            ]);
+
+        } catch (\Exception $e) {
+            // Log error jika terjadi masalah
+            Log::error("Gagal update status untuk ID {$validated['ID']}: " . $e->getMessage());
+
+            // Kirim respons error kembali ke JavaScript
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui status di server.'
+            ], 500);
+        }
+    }
 }
+

@@ -315,7 +315,8 @@
         /* Standardize size of all action buttons */
         .btn-aksi,
         .btnEdit,
-        .btnMelihat {
+        .btnMelihat,
+        .btnUpload {
             display: inline-flex !important;
             align-items: center;
             justify-content: center;
@@ -336,14 +337,16 @@
         /* Hover effect */
         .btn-aksi:hover,
         .btnEdit:hover,
-        .btnMelihat:hover {
+        .btnMelihat:hover,
+        .btnUpload:hover {
             transform: scale(1.1);
         }
 
 
         /* Button colors */
         .btnEdit {
-            background-color: #198754 !important; /* Warna hijau untuk proses */
+            background-color: #198754 !important;
+            /* Warna hijau untuk proses */
         }
 
         .btnEdit:hover {
@@ -356,6 +359,14 @@
 
         .btnMelihat:hover {
             background-color: #0b5ed7 !important;
+        }
+
+        .btnUpload {
+            background-color: #0dcaf0 !important;
+        }
+
+        .btnUpload:hover {
+            background-color: #0aa5c2 !important;
         }
     </style>
 </head>
@@ -370,6 +381,9 @@
         @endif
 
         @if(!empty($header) && !empty($rows))
+
+        <!-- Tabel Tunggal untuk Semua Data -->
+        <h2 class="h4 mb-3">Data Penugasan</h2>
         <div class="table-container">
             <table id="excelTable" class="display responsive nowrap" style="width:100%">
                 <thead>
@@ -382,36 +396,36 @@
                 </thead>
                 <tbody>
                     @foreach($rows as $i => $row)
-                    @php $rowColor = $rowColors[$i] ?? null; @endphp
-                    <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
-                        @foreach($row as $cell)
-                        <td>{{ $cell ?? '' }}</td>
-                        @endforeach
-                        <td>
-                            <div class="d-flex gap-1 justify-content-center">
-                                <!-- Tombol Melihat -->
-                                <button class="btn btn-sm btnMelihat" data-id="{{ $row[0] }}" title="Melihat Detail">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-
-                                <!-- Tombol untuk mengubah status -->
-                                <button class="btn btn-sm btnEdit" data-id="{{ $row[0] }}" title="Ubah Status">
-                                    <i class="fas fa-tasks"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                        @php $rowColor = $rowColors[$i] ?? null; @endphp
+                        <tr @if($rowColor) style="background-color:#{{ $rowColor }}" @endif>
+                            @foreach($row as $cell)
+                            <td>{{ $cell ?? '' }}</td>
+                            @endforeach
+                            <td>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <button class="btn btn-sm btnMelihat" data-id="{{ $row[0] }}" title="Melihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="{{ route('penugasan.create', ['id' => $row[0]]) }}" class="btn btn-sm btnUpload" title="Unggah Penugasan">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </a>
+                                    <button class="btn btn-sm btnEdit" data-id="{{ $row[0] }}" title="Ubah Status">
+                                        <i class="fas fa-tasks"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+
         @else
         <div class="d-flex justify-content-center align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
             <div class="alert alert-info text-center flex-grow-1 mb-0">
                 <i class="fas fa-info-circle me-2"></i>
                 Tidak ada data untuk ditampilkan.
             </div>
-            <!-- Tombol Tambah Data Dihilangkan -->
         </div>
         @endif
 
@@ -522,52 +536,51 @@
             }
 
             // DataTable init
-            if ($('#excelTable').length) {
-                var table = $('#excelTable').DataTable({
-                    pageLength: 25,
-                    lengthMenu: [
-                        [5, 10, 20, 50, -1],
-                        [5, 10, 20, 50, "Semua"]
-                    ],
-                    order: [
-                        [0, "asc"]
-                    ],
-                    scrollX: true,
-                    responsive: true,
-                    language: {
-                        search: "Pencarian:",
-                        lengthMenu: "Tampilkan _MENU_ data per halaman",
-                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                        paginate: {
-                            first: "Pertama",
-                            last: "Terakhir",
-                            next: "Selanjutnya",
-                            previous: "Sebelumnya"
-                        }
+            var table = $('#excelTable').DataTable({
+                pageLength: 25,
+                lengthMenu: [
+                    [5, 10, 20, 50, -1],
+                    [5, 10, 20, 50, "Semua"]
+                ],
+                order: [
+                    [0, "asc"]
+                ],
+                scrollX: true,
+                responsive: true,
+                language: {
+                    search: "Pencarian:",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
                     }
-                });
+                }
+            });
 
-                // LEGEND (TOMBOL DOWNLOAD DAN TAMBAH DIHILANGKAN)
-                var legendHtml = '<div class="legend-container d-flex align-items-center gap-3 ms-3">' +
-                    '<div class="d-flex align-items-center gap-2">' +
-                    '<span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>' +
-                    '<small>&gt; 6 bulan</small>' +
-                    '<span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>' +
-                    '<small>&le; 6 bulan</small>' +
-                    '<span style="display:inline-block;width:20px;height:20px;background:#32CD32;border:1px solid #000;"></span>' +
-                    '<small>Diterima</small>' +
-                    '</div>' +
-                    '</div>';
+            // LEGEND
+            var legendHtml = '<div class="legend-container d-flex align-items-center gap-3 ms-3">' +
+                '<div class="d-flex align-items-center gap-2">' +
+                '<span style="display:inline-block;width:20px;height:20px;background:#CC0000;border:1px solid #000;"></span>' +
+                '<small>&gt; 6 bulan</small>' +
+                '<span style="display:inline-block;width:20px;height:20px;background:#FFFF00;border:1px solid #000;"></span>' +
+                '<small>&le; 6 bulan</small>' +
+                '<span style="display:inline-block;width:20px;height:20px;background:#32CD32;border:1px solid #000;"></span>' +
+                '<small>Diterima</small>' +
+                '</div>' +
+                '</div>';
 
-                $('.dataTables_filter').append(legendHtml);
-            }
+            $('#excelTable_filter').append(legendHtml);
+
 
             // --- Logika Perubahan Status ---
             $(document).on("click", ".btnEdit", async function(e) {
                 e.preventDefault();
                 const id = $(this).data("id");
                 const $row = $(this).closest('tr');
-                const currentRowStatus = $row.find('td:eq(6)').text().trim(); // Asumsi status ada di kolom ke-7 (index 6)
+                const currentRowStatus = table.cell($row, 6).data();
 
                 const {
                     value: newStatus
@@ -591,29 +604,22 @@
                     }
                 });
 
-                if (newStatus) {
+                if (newStatus && newStatus !== currentRowStatus) {
                     $.ajax({
-                        url: '/excel/update', // Menggunakan URL update yang sama
+                        url: '/excel/update',
                         method: 'POST',
                         data: {
                             ID: id,
-                            Status: newStatus, // Hanya mengirim ID dan Status baru
+                            Status: newStatus,
                             _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
                             if (response.success) {
                                 showToast(response.message || 'Status berhasil diperbarui!', 'success');
                                 
-                                // Update data di tabel secara dinamis
-                                var table = $('#excelTable').DataTable();
-                                table.cell($row.find('td:eq(6)')).data(newStatus).draw(false);
-
-                                // Update warna baris jika ada
-                                if (response.rowColor) {
-                                    $row.css('background-color', '#' + response.rowColor);
-                                } else {
-                                    $row.css('background-color', '');
-                                }
+                                const rowData = table.row($row).data();
+                                rowData[6] = newStatus; // Update status in data array
+                                table.row($row).data(rowData).draw(false); // Update the row in place
 
                             } else {
                                 showToast(response.message || 'Gagal memperbarui status!', 'error');
